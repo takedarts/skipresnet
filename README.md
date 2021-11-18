@@ -33,7 +33,7 @@ python src/train.py config/cifar100/ResNet-110.txt output_dir --gpu 0,1
 ```
 This implementation supports training by using TPUs. A following command trains a ResNet-50 model using 8 TPUs with the ImageNet dataset loaded from Google Cloud Storage.
 ```
-python3 src/train.py configs/imagenet/ResNet-50.txt output_dir --tpus 8 --data gs://<your backet>/data/imagenet
+python src/train.py configs/imagenet/ResNet-50.txt output_dir --tpus 8 --data gs://<your backet>/data/imagenet
 ```
 
 <!--
