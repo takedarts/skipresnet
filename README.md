@@ -27,11 +27,14 @@ Run a training script which trains the model from scratch.
 ```
 python src/train.py [config file] [output path] --gpu [GPU ID]
 ```
-For example, a following command trains a ResNet-110 model with the CIFAR-100 dataset by using 2 GPUs, and the results are saved in a output directory named `output_dir`.
+For example, a following command trains a ResNet-110 model  using 2 GPUs with the CIFAR-100 dataset, and the results are saved in a output directory named `output_dir`.
 ```
 python src/train.py config/cifar100/ResNet-110.txt output_dir --gpu 0,1
 ```
-
+This implementation supports training by using TPUs. A following command trains a ResNet-50 model using 8 TPUs with the ImageNet dataset loaded from Google Cloud Storage.
+```
+python3 src/train.py configs/imagenet/ResNet-50.txt output_dir --tpus 8 --data gs://<your backet>/data/imagenet
+```
 
 <!--
 # Performances
