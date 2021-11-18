@@ -25,8 +25,13 @@ If you want to use the ImageNet dataset, you need to download the dataset archiv
 ## Training
 Run a training script which trains the model from scratch.
 ```
-% python src/train.py [config file] [output path] --gpu [GPU ID]
+python src/train.py [config file] [output path] --gpu [GPU ID]
 ```
+For example, a following command trains a ResNet-110 model with the CIFAR-100 dataset by using 2 GPUs, and the results are saved in a output directory named `output_dir`.
+```
+python src/train.py config/cifar100/ResNet-110.txt output_dir --gpu 0,1
+```
+
 
 <!--
 # Performances
