@@ -1,11 +1,11 @@
 model: Skip-WideResNet-40-k10
 dataset: cifar100
-train_batch: 1024
+train_batch: 256
 train_crop: 32
 train_epoch: 600
 train_warmup: 5
 train_optim: sgd
-train_lr: 1.6
+train_lr: 0.4
 train_wdecay: 0.0005
 train_bdecay: False
 train_schedule: cosine
