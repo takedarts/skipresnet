@@ -26,6 +26,7 @@ def create_train_dataloader(
     num_workers: int,
     num_cores: int,
     pin_memory: bool,
+    train_crop: int,
     autoaugment: bool,
     randaugment_num: int,
     randaugment_mag: int,
@@ -42,6 +43,7 @@ def create_train_dataloader(
         dataset_name=dataset_name,
         data_path=pathlib.Path(data_path),
         train=True,
+        crop_size=train_crop,
         batch_size=batch_size,
         num_workers=num_workers,
         num_cores=num_cores,
@@ -66,16 +68,18 @@ def create_valid_dataloader(
     num_workers: int,
     num_cores: int,
     pin_memory: bool,
+    valid_crop: int,
     **kwargs,
 ) -> torch.utils.data.DataLoader:
     return _create_dataloader(
         dataset_name=dataset_name,
         data_path=pathlib.Path(data_path),
-        train=False,
         batch_size=batch_size,
         num_workers=num_workers,
         num_cores=num_cores,
         pin_memory=pin_memory,
+        train=False,
+        crop_size=valid_crop,
         stdaugment=False,
         autoaugment=False,
         randaugment_num=0, randaugment_mag=0,
@@ -88,11 +92,12 @@ def create_valid_dataloader(
 def _create_dataloader(
     dataset_name: str,
     data_path: pathlib.Path,
-    train: bool,
     batch_size: int,
     num_workers: int,
     num_cores: int,
     pin_memory: bool,
+    train: bool,
+    crop_size: int,
     stdaugment: bool,
     autoaugment: bool,
     randaugment_num: int,
@@ -109,6 +114,7 @@ def _create_dataloader(
         dataset_name=dataset_name,
         data_path=data_path,
         train=train,
+        crop_size=crop_size,
         stdaugment=stdaugment,
         autoaugment=autoaugment,
         randaugment_num=randaugment_num,
@@ -135,6 +141,7 @@ def _create_dataset(
     dataset_name: str,
     data_path: pathlib.Path,
     train: bool,
+    crop_size: int,
     stdaugment: bool,
     autoaugment: bool,
     randaugment_num: int,
@@ -144,13 +151,13 @@ def _create_dataset(
 ) -> torch.utils.data.Dataset:
     if dataset_name == 'cifar10':
         return Cifar10Dataset(
-            data_path, train, stdaugment,
-            autoaugment, randaugment_num, randaugment_mag,
+            data_path, train, crop_size, stdaugment, autoaugment,
+            randaugment_num, randaugment_mag,
             randomerasing_prob, randomerasing_type)
     elif dataset_name == 'cifar100':
         return Cifar100Dataset(
-            data_path, train, stdaugment,
-            autoaugment, randaugment_num, randaugment_mag,
+            data_path, train, crop_size, stdaugment, autoaugment,
+            randaugment_num, randaugment_mag,
             randomerasing_prob, randomerasing_type)
     else:
         raise Exception(f'Unsuppoted dataset: {dataset_name}')
@@ -161,6 +168,7 @@ class CifarDataset(torch.utils.data.Dataset):
         self,
         dataset: Any,
         num_classes: int,
+        crop_size: int,
         mean: List[float],
         std: List[float],
         stdaugment: bool,
@@ -174,12 +182,13 @@ class CifarDataset(torch.utils.data.Dataset):
         if stdaugment:
             transforms = [
                 torchvision.transforms.RandomCrop(
-                    32, padding=4, padding_mode='reflect'),
+                    crop_size, padding=4, padding_mode='reflect'),
                 torchvision.transforms.RandomHorizontalFlip(),
                 torchvision.transforms.ToTensor(),
                 torchvision.transforms.Normalize(mean=mean, std=std)]
         else:
             transforms = [
+                torchvision.transforms.Resize(crop_size),
                 torchvision.transforms.ToTensor(),
                 torchvision.transforms.Normalize(mean=mean, std=std)]
 
@@ -218,6 +227,7 @@ class Cifar10Dataset(CifarDataset):
         self,
         path: pathlib.Path,
         train: bool,
+        crop_size: int,
         stdaugment: bool,
         autoaugment: bool,
         randaugment_num: int,
@@ -227,7 +237,7 @@ class Cifar10Dataset(CifarDataset):
     ) -> None:
         super().__init__(
             torchvision.datasets.CIFAR10(str(path), download=False, train=train),
-            num_classes=10, mean=self.MEAN, std=self.STD,
+            crop_size=crop_size, num_classes=10, mean=self.MEAN, std=self.STD,
             stdaugment=stdaugment, autoaugment=autoaugment,
             randaugment_num=randaugment_num, randaugment_mag=randaugment_mag,
             random_erasing_prob=random_erasing_prob,
@@ -242,6 +252,7 @@ class Cifar100Dataset(CifarDataset):
         self,
         path: pathlib.Path,
         train: bool,
+        crop_size: int,
         stdaugment: bool,
         autoaugment: bool,
         randaugment_num: int,
@@ -251,7 +262,7 @@ class Cifar100Dataset(CifarDataset):
     ) -> None:
         super().__init__(
             torchvision.datasets.CIFAR100(path, download=False, train=train),
-            num_classes=100, mean=self.MEAN, std=self.STD,
+            crop_size=crop_size, num_classes=100, mean=self.MEAN, std=self.STD,
             stdaugment=stdaugment, autoaugment=autoaugment,
             randaugment_num=randaugment_num, randaugment_mag=randaugment_mag,
             random_erasing_prob=random_erasing_prob,

@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import pathlib
+import pickle
 import re
 import subprocess
 import time
@@ -36,7 +37,7 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('config', type=str, help='Config file.')
 parser.add_argument('output', type=str, help='Output path.')
-parser.add_argument('--data', type=str, default=None, help='Data path.')
+parser.add_argument('--data', type=str, default=None, help='Data directory.')
 parser.add_argument('--precision', type=int, default=32, choices=[16, 32], help='Precision of training.')
 parser.add_argument('--gpus', type=lambda x: list(map(int, x.split(','))), default=None, help='GPU IDs.')
 parser.add_argument('--tpus', type=int, default=None, help='Number of TPU cores.')
@@ -295,6 +296,7 @@ class Model(pl.LightningModule):
         self.valid_logs = checkpoint['valid_logs']
 
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
+        checkpoint['config'] = pickle.dumps(self.config)
         checkpoint['train_logs'] = self.train_logs
         checkpoint['valid_logs'] = self.valid_logs
 
