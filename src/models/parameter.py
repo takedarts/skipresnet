@@ -577,6 +577,7 @@ large_models = {
         junction=BasicJunction, head=ViTHead,
         normalization=functools.partial(nn.LayerNorm, eps=1e-6),
         activation=lambda *args, **kwargs: nn.GELU(),
+        gate_normalization=lambda channels: nn.LayerNorm([channels, 1, 1], eps=1e-6),
         timm_name='vit_small_patch16_224', timm_loader='vit'),
 
     'ViTBasePatch16-224': update_params(
@@ -588,6 +589,7 @@ large_models = {
         junction=BasicJunction, head=ViTHead,
         normalization=functools.partial(nn.LayerNorm, eps=1e-6),
         activation=lambda *args, **kwargs: nn.GELU(),
+        gate_normalization=lambda channels: nn.LayerNorm([channels, 1, 1], eps=1e-6),
         timm_name='vit_base_patch16_224', timm_loader='vit'),
 }
 
