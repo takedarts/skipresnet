@@ -60,26 +60,14 @@ class ImageNetADataset(torch.utils.data.Dataset):
 
     @staticmethod
     def prepare(path: pathlib.Path) -> None:
-        if (path / 'images').is_dir():
+        if (path / 'imagenet-a').is_dir():
             return
 
         if not (path / 'imagenet-a.tar').is_file():
             ImageNetADataset.download(path)
 
         with tarfile.open(path / 'imagenet-a.tar', 'r') as reader:
-            for item in reader:
-                names = item.name.split('/')
-                if not item.isfile() or len(names) != 3:
-                    continue
-
-                stream = reader.extractfile(item)
-                _, wnid, name = names
-
-                if stream is not None:
-                    file_path = path / 'images' / wnid / name.replace(' ', '')
-                    os.makedirs(file_path.parent, exist_ok=True)
-                    file_path.write_bytes(stream.read())
-                    stream.close()
+            reader.extractall(path)
 
     @staticmethod
     def download(path: pathlib.Path) -> None:
@@ -126,7 +114,7 @@ class ImageNetADataset(torch.utils.data.Dataset):
 
         self.imgs: List[Tuple[pathlib.Path, int]] = []
 
-        for wnid_path in (path / 'images').iterdir():
+        for wnid_path in (path / 'imagenet-a').iterdir():
             if not wnid_path.is_dir():
                 continue
             wnid = wnid_path.name
