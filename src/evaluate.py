@@ -71,10 +71,12 @@ def evaluate(
     dataset_name: str,
     data_path: str,
     batch_size: int,
+    image_size: int,
     device: str,
     progress_bar: bool,
 ) -> Tuple[float, float, float]:
     config: Config = pickle.loads(checkpoint['config'])
+    config.parameters['valid_crop'] = image_size
 
     setup_dataloader(dataset_name=dataset_name, data_path=data_path)
     loader = create_valid_dataloader(
@@ -103,6 +105,9 @@ def main() -> None:
         root_path = pathlib.Path(__file__).parent.parent
         args.data = str(root_path / 'data' / args.dataset)
 
+    if args.image_size is None:
+        args.image_size = config.parameters['valid_crop']
+
     if args.gpu is not None:
         device = f'cuda:{args.gpu}'
     else:
@@ -113,6 +118,7 @@ def main() -> None:
         dataset_name=args.dataset,
         data_path=args.data,
         batch_size=args.batch_size,
+        image_size=args.image_size,
         device=device,
         progress_bar=not args.no_progress)
 
