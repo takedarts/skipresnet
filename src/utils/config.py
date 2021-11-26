@@ -30,9 +30,10 @@ PARAMETERS: List[Tuple[str, Any, str]] = [
     ('stochdepth_prob', 0.0, 'Drop probability of stochastic depth.'),
     ('signalaugment', 0.0, 'Standard deviation of signal augmentation.'),
     ('semodule_reduction', 16, 'Reduction ratio of "Squeeze and Excitation" modules.'),
-    ('gate_reduction', 8, 'reduction rate of gate modules in DenseResNets or SkipResNets.'),
-    ('dense_connections', 4, 'number of connections of gate modules in DenseResNets.'),
-    ('skip_connections', 16, 'number of connections of gate modules in SkipResNets.'),
+    ('gate_reduction', 8, 'Reduction rate of gate modules in DenseResNets or SkipResNets.'),
+    ('dense_connections', 4, 'Number of connections of gate modules in DenseResNets.'),
+    ('skip_connections', 16, 'Number of connections of gate modules in SkipResNets.'),
+    ('pretrained', False, 'Load pretrained weights from pytorch-image-models (timm).'),
 ]
 
 
