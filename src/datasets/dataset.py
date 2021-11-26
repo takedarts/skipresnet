@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from . import cifar, dummy, imagenet
+from . import cifar, dummy, imagenet, imageneta
 
 
 def setup_dataloader(dataset_name: str, data_path: str) -> None:
@@ -8,6 +8,8 @@ def setup_dataloader(dataset_name: str, data_path: str) -> None:
         cifar.setup_dataloader(dataset_name, data_path)
     elif dataset_name == 'imagenet':
         imagenet.setup_dataloader(dataset_name, data_path)
+    elif dataset_name == 'imageneta':
+        imageneta.setup_dataloader(dataset_name, data_path)
     elif dataset_name == 'dummy':
         dummy.setup_dataloader(dataset_name, data_path)
     else:
@@ -72,6 +74,15 @@ def create_valid_dataloader(
             **kwargs)
     elif dataset_name == 'imagenet':
         return imagenet.create_valid_dataloader(
+            dataset_name=dataset_name,
+            data_path=data_path,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            num_cores=num_cores,
+            pin_memory=pin_memory,
+            **kwargs)
+    elif dataset_name == 'imageneta':
+        return imageneta.create_valid_dataloader(
             dataset_name=dataset_name,
             data_path=data_path,
             batch_size=batch_size,
