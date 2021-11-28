@@ -45,33 +45,40 @@ python src/train.py \
 
 # Performances
 The subscript of each model is the number of training runs, and the row indicates the median of the training results. For example, a row of "model<sub>(5)</sub>" shows the median performances of the 5 trained models.
+
 ## Performances of models trained on ImageNet-1k
+Following models are trainied by the ImageNet-1k dataset from scratch. The image used for the training is cropped to a 224x224 size image, and no extra images are used.
+
 ### Models
 |Model|# params|flops (224x224)|settings|
 |:---|:---:|:---:|:---|
-|ResNet-34<br>Skip-ResNet-34|21.8M<br>22.7M|3.68G<br>3.69G|[ResNet-34.txt](configs/train/imagenet/ResNet-34.txt)<br>[Skip-ResNet-34.txt](configs/train/imagenet/Skip-ResNet-34.txt)|
-|ResNet-50<br>Skip-ResNet-50|25.6M<br>40.2M|4.14G<br>4.20G|[ResNet-50.txt](configs/train/imagenet/ResNet-50.txt)<br>[Skip-ResNet-50.txt](configs/train/imagenet/Skip-ResNet-50.txt)|
+|ResNet-34<br>Skip-ResNet-34|21.80M<br>22.72M|3.681G<br>3.694G|[ResNet-34.txt](configs/train/imagenet/ResNet-34.txt)<br>[Skip-ResNet-34.txt](configs/train/imagenet/Skip-ResNet-34.txt)|
+|ResNet-50<br>Skip-ResNet-50|25.56M<br>40.15M|4.138G<br>4.201G|[ResNet-50.txt](configs/train/imagenet/ResNet-50.txt)<br>[Skip-ResNet-50.txt](configs/train/imagenet/Skip-ResNet-50.txt)|
+|ResNeXt-50-32x4d<br>Skip-ResNeXt-50-32x4d|25.03M<br>39.63M|11.46G<br>11.52G|[ResNeXt-50-32x4d.txt](configs/train/imagenet/ResNeXt-50-32x4d.txt)<br>[Skip-ResNeXt-50-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-50-32x4d.txt)|
+
 ### Results on the ImageNet-1k dataset
-|<br>Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|
-|:---|:---:|:---:|:---:|
-|ResNet-34<sub>(1)</sub><br>Skip-ResNet-34<sub>(1)</sub>|0.7539<br>0.7675|0.7612<br>0.7759|0.7636<br>0.7614|
-|ResNet-50<sub>(1)</sub><br>Skip-ResNet-50<sub>(1)</sub>|0.7887<br>0.8029|0.7948<br>0.8103|0.7954<br>0.8120|
+|Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|
+|:---|:---:|:---:|:---:|:---:|
+|ResNet-34<sub>(1)</sub><br>Skip-ResNet-34<sub>(1)</sub>|0.7539<br>0.7675|0.7612<br>0.7759|0.7636<br>0.7773|0.7653<br>**0.7782**|
+|ResNet-50<sub>(1)</sub><br>Skip-ResNet-50<sub>(1)</sub>|0.7887<br>0.8029|0.7948<br>0.8103|0.7954<br>**0.8120**|0.7951<br>0.8095|
+|ResNeXt-50-32x4d<sub>(1)</sub><br>Skip-ResNeXt-50-32x4d<sub>(1)</sub>|0.7963<br>0.8067|0.8015<br>0.8125|0.8032<br>**0.8131**|0.8016<br>0.8110|
 
-## Performances of models trained on CIFAR-100
+## Performances of models trained on CIFAR-10/100
+Following models are trainied by the CIFAR-10/100 dataset from scratch. No extra images are used.
+
 ### Models
-|Model|# params|flops (224x224)|settings|
+|Model|# params|flops (32x32)|settings|
 |:---|:---:|:---:|:---|
-|ResNet-110<br>Skip-ResNet-34|1.74M<br>2.19M|258M<br>265M|[ResNet-110.txt](configs/train/cifar100/ResNet-110.txt)<br>[Skip-ResNet-110.txt](configs/train/cifar100/Skip-ResNet-110.txt)|
-|WideResNet-28-k10<br>Skip-WideResNet-28-k10|36.5M<br>38.2M|5.25G<br>5.27G|[WideResNet-28-k10.txt](configs/train/cifar100/WideResNet-28-k10.txt)<br>[Skip-WideResNet-28-k10.txt](configs/train/cifar100/Skip-WideResNet-28-k10.txt)|
-|WideResNet-40-k10<br>Skip-WideResNet-40-k10|55.9M<br>58.6M|8.09G<br>8.11G|[WideResNet-40-k10.txt](configs/train/cifar100/WideResNet-40-k10.txt)<br>[Skip-WideResNet-40-k10.txt](configs/train/cifar100/Skip-WideResNet-40-k10.txt)|
-<!--
-### CIFAR-100
-|Model|# params|flops|top-1 acc.|settings|
-|---:|:---:|:---:|:---:|:---|
-|ResNet-110<br>Dense-ResNet-110|1.74M<br>2.23M|258M<br>264M|79.03%<br>80.34%|[resnet-110.txt](config/cifar/resnet-110.txt)|
+|ResNet-110<br>Skip-ResNet-34|1.737M<br>2.189M|257.9M<br>265.4M|[ResNet-110.txt](configs/train/cifar100/ResNet-110.txt)<br>[Skip-ResNet-110.txt](configs/train/cifar100/Skip-ResNet-110.txt)|
+|WideResNet-28-k10<br>Skip-WideResNet-28-k10|36.54M<br>38.18M|5.254G<br>5.266G|[WideResNet-28-k10.txt](configs/train/cifar100/WideResNet-28-k10.txt)<br>[Skip-WideResNet-28-k10.txt](configs/train/cifar100/Skip-WideResNet-28-k10.txt)|
+|WideResNet-40-k10<br>Skip-WideResNet-40-k10|55.90M<br>58.64M|8.091G<br>8.111G|[WideResNet-40-k10.txt](configs/train/cifar100/WideResNet-40-k10.txt)<br>[Skip-WideResNet-40-k10.txt](configs/train/cifar100/Skip-WideResNet-40-k10.txt)|
 
-### CIFAR-10
-|Model|# params|flops|top-1 acc.|settings|
-|---:|:---:|:---:|:---:|:---|
-|ResNet-110<br>Dense-ResNet-110|1.74M<br>2.23M|258M<br>264M|96.40%<br>96.59%|[resnet-110.txt](config/cifar/resnet-110.txt)|
+<!--
+### Results on the CIFAR-10/100 dataset
+|Model|top-1 acc. (CIFAR-10)|top-1 acc (CIFAR-100)|
+|:---|:---:|:---:|
+|ResNet-110<sub>(1)</sub><br>Skip-ResNet-110<sub>(1)</sub>|<br>|<br>|
 -->
+
+# Acknowledgement
+This work is supported by JSPS KAKENHI Grant Number JP20K11871, and a part of this experiment is supported by the TPU Research Cloud program.
