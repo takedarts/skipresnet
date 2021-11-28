@@ -53,8 +53,8 @@ def main() -> None:
     image = torch.randn([1, 3, size, size], dtype=torch.float32)
     flops = count_operations(model, (image,))
 
-    print(f'flops: {flops:,d} ({format_with_scale(flops)})')
     print(f'parameters: {params:,d} ({format_with_scale(params)})')
+    print(f'flops: {flops:,d} ({format_with_scale(flops)})')
 
 
 if __name__ == '__main__':
