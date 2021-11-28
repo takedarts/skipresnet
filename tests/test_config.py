@@ -1,6 +1,6 @@
 import io
 import pytest
-from training import Config
+from utils import Config
 
 CONFIG1 = [
     ('model', 'resnet-110'),
