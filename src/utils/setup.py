@@ -7,18 +7,16 @@ import warnings
 import numpy as np
 import torch.cuda
 
+LOGGING_HANDLER = logging.StreamHandler(stream=sys.stdout)
+LOGGING_HANDLER.setFormatter(logging.Formatter(
+    '%(asctime)s [%(levelname)-5.5s] '
+    '%(message)s (%(module)s.%(funcName)s:%(lineno)s)',
+    '%Y-%m-%d %H:%M:%S'))
+
 
 def setup_logging(debug: bool) -> None:
-    if len(logging.getLogger().handlers) != 0:
-        return
-
-    formatter = logging.Formatter('%(asctime)s [%(levelname)-5.5s] '
-                                  '%(message)s (%(module)s.%(funcName)s:%(lineno)s)',
-                                  '%Y-%m-%d %H:%M:%S')
-
-    handler = logging.StreamHandler(stream=sys.stdout)
-    handler.setFormatter(formatter)
-    logging.getLogger().addHandler(handler)
+    if LOGGING_HANDLER not in logging.getLogger().handlers:
+        logging.getLogger().addHandler(LOGGING_HANDLER)
 
     logging.getLogger().setLevel(logging.DEBUG if debug else logging.INFO)
     logging.getLogger('PIL').setLevel(logging.INFO)
