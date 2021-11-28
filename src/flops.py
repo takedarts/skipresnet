@@ -26,7 +26,7 @@ parser.add_argument('--debug', action='store_true', default=False, help='Debug m
 def format_with_scale(num: int) -> str:
     scale_chars = ('', 'K', 'M', 'G', 'T', 'P')
     scale_index = (len(str(num)) - 1) // 3
-    after_point = 2 - ((len(str(num)) - 1) % 3)
+    after_point = 3 - ((len(str(num)) - 1) % 3)
     return f'{{:.{after_point}f}}{scale_chars[scale_index]}'.format(
         num / (1_000 ** scale_index))
 
