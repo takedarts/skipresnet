@@ -1,13 +1,14 @@
 import os
 os.environ['PYTORCH_JIT'] = '0'
 
-from utils import Config, count_operations, setup_logging
-from models import create_model
-import torch
-import warnings
-import logging
 import argparse
+import logging
+import warnings
 
+import torch
+
+from models import create_model
+from utils import Config, count_operations, setup_logging
 
 LOGGER = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ def main() -> None:
     # flops
     size = config.parameters['valid_crop']
     image = torch.randn([1, 3, size, size], dtype=torch.float32)
-    flops = count_operations(model, image)
+    flops = count_operations(model, (image,))
 
     print(f'flops: {flops:,d} ({format_with_scale(flops)})')
     print(f'parameters: {params:,d} ({format_with_scale(params)})')
