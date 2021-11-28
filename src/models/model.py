@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from .modules import FrozenBatchNorm2d
 from .parameter import PARAMETERS
@@ -87,7 +88,7 @@ class Model(nn.Module):
 
     def get_prediction(self, x: torch.Tensor, aggregation: bool = True) -> torch.Tensor:
         if aggregation:
-            x = nn.functional.adaptive_avg_pool2d(x, [1, 1])
+            x = F.adaptive_avg_pool2d(x, (1, 1))
             x = self.dropout(x)
             x = self.classifier(x)
             x = x.reshape(x.shape[0], -1)
