@@ -45,17 +45,17 @@ python src/train.py \
 
 # Performances
 The subscript of each model is the number of training runs, and the row indicates the median of the training results. For example, a row of "model<sub>(5)</sub>" shows the median performances of the 5 trained models.
-## Training from scratch
+## Performances of models trained on ImageNet-1k
 ### Models
 |Model|# params|flops (224x224)|settings|
 |---:|:---:|:---:|:---|
 |ResNet-34<br>Skip-ResNet-34|21.8M<br>22.7M|3.68G<br>3.69G|[ResNet-34.txt](configs/train/imagenet/ResNet-34.txt)<br>[Skip-ResNet-34.txt](configs/train/imagenet/Skip-ResNet-34.txt)|
 |ResNet-50<br>Skip-ResNet-50|25.6M<br>40.2M|4.14G<br>4.20G|[ResNet-50.txt](configs/train/imagenet/ResNet-50.txt)<br>[Skip-ResNet-50.txt](configs/train/imagenet/Skip-ResNet-50.txt)|
 ### Results on the ImageNet-1k dataset
-|Model|top-1 acc. (224x224)|top-1 acc. (256x256)|top-1 acc. (288x288)|
+|<br>Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|
 |---:|:---:|:---:|:---:|
-|ResNet-34<sub>(1)</sub><br>Skip-ResNet-34<sub>(1)</sub>|0.7539<br>0.7675| | |
-|ResNet-50<sub>(1)</sub><br>Skip-ResNet-50<sub>(1)</sub>| | | |
+|ResNet-34<sub>(1)</sub><br>Skip-ResNet-34<sub>(1)</sub>|0.7539<br>0.7675|0.7612<br>0.7759|0.7636<br>0.7614|
+|ResNet-50<sub>(1)</sub><br>Skip-ResNet-50<sub>(1)</sub>|0.7887<br>0.8029|0.7948<br>0.8103|0.7954<br>0.8120|
 
 <!--
 ### CIFAR-100
