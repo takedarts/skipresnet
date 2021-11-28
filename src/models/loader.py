@@ -59,8 +59,8 @@ def _load_resnet_parameters(model: Any, timm_model: Any) -> None:
         copy_block_state_dict(model.blocks[index], ref_block)
         index += 1
 
-    model.classifier.conv.weight[:] = timm_model.fc.weight[:, :, None, None]
-    model.classifier.conv.bias[:] = timm_model.fc.bias
+    model.classifier.conv.weight.data[:] = timm_model.fc.weight[:, :, None, None].data
+    model.classifier.conv.bias.data[:] = timm_model.fc.bias.data
 
 
 def _load_efficientnet_parameters(model: Any, timm_model: Any) -> None:
@@ -95,14 +95,14 @@ def _load_efficientnet_parameters(model: Any, timm_model: Any) -> None:
 
     model.head.conv.load_state_dict(timm_model.conv_head.state_dict())
     model.head.norm.load_state_dict(timm_model.bn2.state_dict())
-    model.classifier.conv.weight[:] = timm_model.classifier.weight[:, :, None, None]
-    model.classifier.conv.bias[:] = timm_model.classifier.bias
+    model.classifier.conv.weight.data[:] = timm_model.classifier.weight[:, :, None, None].data
+    model.classifier.conv.bias.data[:] = timm_model.classifier.bias.data
 
 
 def _load_vit_parameters(model: Any, timm_model: Any) -> None:
     model.stem.conv.load_state_dict(timm_model.patch_embed.proj.state_dict())
-    model.stem.cls_token[0, :, 0, 0] = timm_model.cls_token[0, 0]
-    model.stem.pos_embed[0, :, :, 0] = timm_model.pos_embed[0].permute(1, 0)
+    model.stem.cls_token.data[0, :, 0, 0] = timm_model.cls_token.data[0, 0]
+    model.stem.pos_embed.data[0, :, :, 0] = timm_model.pos_embed[0].permute(1, 0).data
 
     for i in range(len(model.blocks) // 2):
         model.blocks[i * 2 + 0].operation.attn_norm.load_state_dict(
@@ -120,5 +120,5 @@ def _load_vit_parameters(model: Any, timm_model: Any) -> None:
             timm_model.blocks[i].mlp.fc2.state_dict())
 
     model.head.norm.load_state_dict(timm_model.norm.state_dict())
-    model.classifier.conv.weight[:] = timm_model.head.weight[:, :, None, None]
-    model.classifier.conv.bias[:] = timm_model.head.bias
+    model.classifier.conv.weight.data[:] = timm_model.head.weight[:, :, None, None].data
+    model.classifier.conv.bias.data[:] = timm_model.head.bias.data
