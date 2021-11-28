@@ -37,21 +37,27 @@ python src/train.py \
 This implementation supports training by using TPUs. A following command trains a ResNet-50 model using 8 TPUs with the ImageNet dataset loaded from Google Cloud Storage. In this case, you need to make shard files of the ImageNet dataset and stored them to Google Cloud Storage before starting the training.
 ```
 python src/train.py \
-    configs/imagenet/ResNet-50.txt \
+    configs/train/imagenet/ResNet-50.txt \
     output_directory \
     --tpus 8 \
     --data gs://<your backet>/data/imagenet
 ```
 
-<!--
 # Performances
-## Image Classification
-### ImageNet-1k
-|Model|# params|flops|top-1 acc.|settings|
-|---:|:---:|:---:|:---:|:---|
-|<br>ResNet-34<br>Skip-ResNet-34|3.50M<br>4.08M|315M<br>322M|72.66%<br>73.69%|[ResNet-34.txt](config/imagenet/ResNet-34.txt)<br>[Skip-ResNet-34.txt](config/imagenet/Skip-ResNet-34.txt)|
-|ResNet-50<br>Skip-ResNet-50|5.48M<br>5.85M|236M<br>242M|74.14%<br>74.42%|[mobilenetv3-large.txt](config/imagenet/mobilenetv3-large.txt)|
+The subscript of each model is the number of training runs, and the row indicates the median of the training results. For example, a row of "model<sub>(5)</sub>" shows the median performances of the 5 trained models.
+## Training from scratch
+### Models
+|Model|# params|flops (224x224)|settings|
+|---:|:---:|:---:|:---|
+|ResNet-34<br>Skip-ResNet-34|21.8M<br>22.7M|3.68G<br>3.69G|[ResNet-34.txt](configs/train/imagenet/ResNet-34.txt)<br>[Skip-ResNet-34.txt](configs/train/imagenet/Skip-ResNet-34.txt)|
+|ResNet-50<br>Skip-ResNet-50|25.6M<br>40.2M|4.14G<br>4.20G|[ResNet-50.txt](configs/train/imagenet/ResNet-50.txt)<br>[Skip-ResNet-50.txt](configs/train/imagenet/Skip-ResNet-50.txt)|
+### Results on the ImageNet-1k dataset
+|Model|top-1 acc. (224x224)|top-1 acc. (256x256)|top-1 acc. (288x288)|
+|---:|:---:|:---:|:---:|
+|ResNet-34<sub>(1)</sub><br>Skip-ResNet-34<sub>(1)</sub>|0.7539<br>0.7675| | |
+|ResNet-50<sub>(1)</sub><br>Skip-ResNet-50<sub>(1)</sub>| | | |
 
+<!--
 ### CIFAR-100
 |Model|# params|flops|top-1 acc.|settings|
 |---:|:---:|:---:|:---:|:---|
