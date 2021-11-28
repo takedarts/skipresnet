@@ -1,6 +1,6 @@
 import models
-import torch
 import timm
+import torch
 
 
 def test_resnet18():
