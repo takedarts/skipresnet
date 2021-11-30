@@ -69,7 +69,7 @@ Following models are trainied using the CIFAR-10/100 dataset from scratch. No ex
 ### Models
 |Model|# params|flops (32x32)|settings|
 |:---|:---:|:---:|:---|
-|ResNet-110<br>Skip-ResNet-34|1.737M<br>2.189M|257.9M<br>265.4M|[ResNet-110.txt](configs/train/cifar100/ResNet-110.txt)<br>[Skip-ResNet-110.txt](configs/train/cifar100/Skip-ResNet-110.txt)|
+|ResNet-34<br>Skip-ResNet-34|1.737M<br>2.189M|257.9M<br>265.4M|[ResNet-110.txt](configs/train/cifar100/ResNet-110.txt)<br>[Skip-ResNet-110.txt](configs/train/cifar100/Skip-ResNet-110.txt)|
 |WideResNet-28-k10<br>Skip-WideResNet-28-k10|36.54M<br>38.18M|5.254G<br>5.266G|[WideResNet-28-k10.txt](configs/train/cifar100/WideResNet-28-k10.txt)<br>[Skip-WideResNet-28-k10.txt](configs/train/cifar100/Skip-WideResNet-28-k10.txt)|
 |WideResNet-40-k10<br>Skip-WideResNet-40-k10|55.90M<br>58.64M|8.091G<br>8.111G|[WideResNet-40-k10.txt](configs/train/cifar100/WideResNet-40-k10.txt)<br>[Skip-WideResNet-40-k10.txt](configs/train/cifar100/Skip-WideResNet-40-k10.txt)|
 
