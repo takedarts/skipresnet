@@ -44,10 +44,10 @@ python src/train.py \
 ```
 
 # Performances
-The subscript of each model is the number of training runs, and the row indicates the median of the training results. For example, a row of "model<sub>(5)</sub>" shows the median performances of the 5 trained models.
+The subscript of each model is the number of training runs, and the row indicates the median of the training results. For example, a row of "model<sub>(5)</sub>" shows the median performance of the 5 trained models.
 
 ## Performances of models trained on ImageNet-1k
-Following models are trainied by the ImageNet-1k dataset from scratch. The image used for the training is cropped to a 224x224 size image, and no extra images are used.
+Following models are trainied using the ImageNet-1k dataset from scratch. The image used for the training is cropped to a 224x224 size image, and no extra images are used.
 
 ### Models
 |Model|# params|flops (224x224)|settings|
@@ -64,7 +64,7 @@ Following models are trainied by the ImageNet-1k dataset from scratch. The image
 |ResNeXt-50-32x4d<sub>(1)</sub><br>Skip-ResNeXt-50-32x4d<sub>(1)</sub>|0.7963<br>0.8067|0.8015<br>0.8125|0.8032<br>**0.8131**|0.8016<br>0.8110|
 
 ## Performances of models trained on CIFAR-10/100
-Following models are trainied by the CIFAR-10/100 dataset from scratch. No extra images are used.
+Following models are trainied using the CIFAR-10/100 dataset from scratch. No extra images are used.
 
 ### Models
 |Model|# params|flops (32x32)|settings|
@@ -73,12 +73,10 @@ Following models are trainied by the CIFAR-10/100 dataset from scratch. No extra
 |WideResNet-28-k10<br>Skip-WideResNet-28-k10|36.54M<br>38.18M|5.254G<br>5.266G|[WideResNet-28-k10.txt](configs/train/cifar100/WideResNet-28-k10.txt)<br>[Skip-WideResNet-28-k10.txt](configs/train/cifar100/Skip-WideResNet-28-k10.txt)|
 |WideResNet-40-k10<br>Skip-WideResNet-40-k10|55.90M<br>58.64M|8.091G<br>8.111G|[WideResNet-40-k10.txt](configs/train/cifar100/WideResNet-40-k10.txt)<br>[Skip-WideResNet-40-k10.txt](configs/train/cifar100/Skip-WideResNet-40-k10.txt)|
 
-<!--
 ### Results on the CIFAR-10/100 dataset
 |Model|top-1 acc. (CIFAR-10)|top-1 acc (CIFAR-100)|
 |:---|:---:|:---:|
-|ResNet-110<sub>(1)</sub><br>Skip-ResNet-110<sub>(1)</sub>|<br>|<br>|
--->
+|ResNet-110<sub>(5)</sub><br>Skip-ResNet-110<sub>(5)</sub>|<br>|0.7798<br>0.7988|
 
 # Acknowledgement
 This work is supported by JSPS KAKENHI Grant Number JP20K11871, and a part of this experiment is supported by the TPU Research Cloud program.
