@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, List, Tuple
 
 PARAMETERS: List[Tuple[str, Any, str]] = [
     ('train_batch', 64, 'Batch size at training.'),
@@ -29,50 +29,50 @@ PARAMETERS: List[Tuple[str, Any, str]] = [
     ('dropblock_size', 7, 'Drop block size of DropBlock.'),
     ('stochdepth_prob', 0.0, 'Drop probability of stochastic depth.'),
     ('signalaugment', 0.0, 'Standard deviation of signal augmentation.'),
-    ('semodule_reduction', 16, 'Reduction ratio of "Squeeze and Excitation" modules.'),
-    ('gate_reduction', 8, 'Reduction rate of gate modules in DenseResNets or SkipResNets.'),
-    ('dense_connections', 4, 'Number of connections of gate modules in DenseResNets.'),
-    ('skip_connections', 16, 'Number of connections of gate modules in SkipResNets.'),
     ('pretrained', False, 'Load pretrained weights from pytorch-image-models (timm).'),
 ]
 
 
 class Config(object):
     def __init__(self, file_or_stream: Any = None) -> None:
-        self.model: str = ''
-        self.dataset: str = ''
-        self.parameters: Dict[str, Any] = {k: v for k, v, _ in PARAMETERS}
+        self.model = ''
+        self.dataset = ''
+        self.parameters = {k: v for k, v, _ in PARAMETERS}
 
         if file_or_stream is None:
             return
         elif hasattr(file_or_stream, 'read'):
-            self._load(file_or_stream)
+            self._read(file_or_stream)
         else:
             with open(str(file_or_stream), 'r') as reader:
-                self._load(reader)
+                self._read(reader)
 
-    def _load(self, reader: Any) -> None:
+    def _read(self, reader: Any) -> None:
         for line in reader:
             tokens = line.split('#', maxsplit=1)[0].split(':', maxsplit=1)
-            if len(tokens) != 2:
-                continue
+            if len(tokens) == 2:
+                self._update(*[v.strip() for v in tokens])
 
-            key, value = [v.strip() for v in tokens]
-            if key == 'model':
-                self.model = value
-            elif key == 'dataset':
-                self.dataset = value
-            elif key in self.parameters:
-                self._update_parameter(key, value)
-            else:
-                raise Exception(f'unknown parameter name: {key}')
+    def _update(self, key: str, value: str) -> None:
+        if key == 'model':
+            self.model = value
+        elif key == 'dataset':
+            self.dataset = value
+        elif key in self.parameters:
+            self._update_parameter(key, value)
+        else:
+            raise Exception(f'unknown parameter name: {key}')
 
     def _update_parameter(self, key: str, value: str) -> None:
         old_value = self.parameters[key]
+
         if isinstance(old_value, bool):
             self.parameters[key] = (value.lower() in ('yes', 'true', 'on', '1'))
         else:
             self.parameters[key] = type(old_value)(value)
+
+    def update(self, key: str, value: Any) -> None:
+        self._update(key, str(value))
 
     def __str__(self) -> str:
         helps = {k: d for k, _, d in PARAMETERS}

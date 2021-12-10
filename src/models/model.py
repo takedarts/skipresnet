@@ -3,7 +3,7 @@ This is a module for building an image classification model.
 Copyright 2021 Atsushi TAKEDA
 '''
 import itertools
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -11,7 +11,6 @@ import torch.nn.functional as F
 
 from .modules import FrozenBatchNorm2d
 from .parameter import PARAMETERS
-from .loader import load_parameters
 
 try:
     import timm
@@ -37,8 +36,8 @@ class Model(nn.Module):
         head_channels: int,
         dropout: float,
         pretrained: bool = False,
-        timm_name: str = None,
-        timm_loader: str = None,
+        timm_name: Optional[str] = None,
+        timm_loader: Optional[Callable[[nn.Module, nn.Module], None]] = None,
         **kwargs: Dict[str, Any]
     ):
         super().__init__()
@@ -62,12 +61,12 @@ class Model(nn.Module):
         self.dropout = nn.Dropout(p=dropout, inplace=True)
         self.classifier = classifier(head_channels, **kwargs)
 
-        # load pretrained weights
+        # loader
+        self.timm_name = timm_name
+        self.timm_loader = timm_loader
+
         if pretrained:
-            if timm_name is None or timm_loader is None:
-                raise Exception(
-                    'Required parameters for loading pretrained weights are not set.')
-            self.load_pretrained_parameters(timm_name, timm_loader)
+            self.load_pretrained_parameters()
 
     def freeze_blocks(self) -> None:
         _freeze_parameters(self.stem)
@@ -103,39 +102,44 @@ class Model(nn.Module):
 
         return x
 
-    def load_pretrained_parameters(self, timm_name: str, timm_loader: str) -> None:
+    def load_model_parameters(self, model: nn.Module) -> None:
+        if self.timm_loader is None:
+            raise Exception('Function for loading weights is not set.')
+
+        self.timm_loader(self, model)
+
+    def load_pretrained_parameters(self) -> None:
         if timm is None:
             raise Exception('Module `timm` is required: try `pip install timm`')
 
-        if timm_name not in timm.list_models(pretrained=True):
-            raise Exception(f'Pretrained weights of `{timm_name}` do not exist.')
+        if self.timm_name is None:
+            raise Exception('Name of a pretrained model is not set.')
 
-        timm_model = timm.create_model(timm_name, pretrained=True)
-        load_parameters(self, timm_model, timm_loader)
-        self.timm_model = timm_model
+        if self.timm_name not in timm.list_models(pretrained=True):
+            raise Exception(f'Pretrained weights of `{self.timm_name}` is not found.')
+
+        model = timm.create_model(self.timm_name, pretrained=True)
+        self.load_model_parameters(model)
 
 
 def create_model(dataset_name, model_name, **kwargs):
-    model_params = {
-        'normalization': nn.BatchNorm2d,
-        'activation': nn.ReLU,
-        'semodule': False,
-        'semodule_reduction': 16,
-        'semodule_activation': nn.ReLU,
-        'semodule_sigmoid': nn.Sigmoid,
-        'seoperation': False,
-        'seoperation_reduction': 4,
-        'seoperation_sigmoid': nn.Sigmoid,
-        'gate_normalization': nn.BatchNorm2d,
-        'gate_activation': nn.ReLU,
-        'dropout': 0.0,
-        'shakedrop': 0.0,
-        'stochdepth': 0.0,
-        'signalaugment': 0.0,
-        'gate_reduction': 8,
-        'dense_connections': 4,
-        'skip_connections': 4,
-    }
+    model_params = dict(
+        normalization=nn.BatchNorm2d,
+        activation=nn.ReLU,
+        semodule=False,
+        semodule_reduction=8,
+        semodule_divisor=1,
+        semodule_activation=nn.ReLU,
+        semodule_sigmoid=nn.Sigmoid,
+        gate_reduction=8,
+        gate_normalization=nn.BatchNorm2d,
+        gate_activation=nn.ReLU,
+        gate_connections=4,
+        dropout=0.0,
+        shakedrop=0.0,
+        stochdepth=0.0,
+        signalaugment=0.0,
+    )
 
     model_params.update(PARAMETERS[dataset_name][model_name])
     model_params.update(kwargs)

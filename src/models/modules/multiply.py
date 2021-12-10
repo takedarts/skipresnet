@@ -12,3 +12,6 @@ class Multiply(nn.Module):
             return x.mul_(self.multiply)
         else:
             return x * self.multiply
+
+    def extra_repr(self):
+        return '{}, inplace={}'.format(self.multiply, self.inplace)

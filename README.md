@@ -36,7 +36,7 @@ python src/train.py \
 ```
 This implementation supports training by using TPUs. A following command trains a ResNet-50 model using 8 TPUs with the ImageNet dataset loaded from Google Cloud Storage. In this case, you need to make shard files of the ImageNet dataset and stored them to Google Cloud Storage before starting the training.
 ```
-python src/train.py \
+PYTORCH_JIT=0 python src/train.py \
     configs/train/imagenet/ResNet-50.txt \
     output_directory \
     --tpus 8 \

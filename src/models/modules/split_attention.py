@@ -1,15 +1,14 @@
 import torch.nn as nn
 import collections
-import math
 
 
 class SplitAttentionModule(nn.Module):
-
     def __init__(self, out_channels, radix, groups,
                  normalization, activation, reduction=4):
         super().__init__()
-        channels = max(out_channels * radix // reduction, 1)
-        channels = math.ceil(channels / 8) * 8
+
+        channels = max(out_channels * radix // reduction, 32)
+        channels = (channels // 8) * 8
 
         self.op = nn.Sequential(collections.OrderedDict([
             ('conv1', nn.Conv2d(
@@ -21,15 +20,22 @@ class SplitAttentionModule(nn.Module):
         ]))
 
         self.radix = radix
+        self.groups = groups
 
     def forward(self, x):
-        w = x.reshape(x.shape[0], self.radix, -1, *x.shape[2:])
+        B, _, H, W = x.shape
+        w = x.reshape(B, self.radix, -1, H, W)
         w = w.sum(dim=1).mean(dim=(2, 3), keepdims=True)
         w = self.op(w)
-        w = w.reshape(w.shape[0], self.radix, -1, *w.shape[2:])
-        w = w.softmax(dim=1)
 
-        x = x.reshape(*w.shape[:3], *x.shape[2:])
-        x = (x * w).sum(dim=1)
+        if self.radix > 1:
+            w = w.reshape(B, self.groups, self.radix, -1).transpose(1, 2)
+            w = w.softmax(dim=1)
+            w = w.reshape(B, self.radix, -1, 1, 1)
+            x = x.reshape(B, self.radix, -1, H, W)
+            x = (x * w).sum(dim=1)
+        else:
+            w = w.sigmoid()
+            x = x * w
 
         return x

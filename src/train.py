@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import pathlib
-import pickle
 import re
 import subprocess
 import time
@@ -296,7 +295,11 @@ class Model(pl.LightningModule):
         self.valid_logs = checkpoint['valid_logs']
 
     def on_save_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
-        checkpoint['config'] = pickle.dumps(self.config)
+        checkpoint['config'] = {
+            'model': self.config.model,
+            'dataset': self.config.dataset,
+            'parameters': self.config.parameters
+        }
         checkpoint['train_logs'] = self.train_logs
         checkpoint['valid_logs'] = self.valid_logs
 

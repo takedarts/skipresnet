@@ -26,7 +26,3 @@ dropblock_prob: 0.0
 dropblock_size: 7
 stochdepth_prob: 0.0
 signalaugment: 0.0
-semodule_reduction: 8
-gate_reduction: 2
-dense_connections: 4
-skip_connections: 4

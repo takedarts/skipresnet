@@ -1,6 +1,6 @@
 import argparse
+import hashlib
 import pathlib
-import pickle
 from typing import Any, Iterable, Tuple
 
 import torch
@@ -67,23 +67,18 @@ def run(
 
 
 def evaluate(
-    checkpoint: Any,
-    dataset_name: str,
+    config: Config,
+    state_dict: Any,
     data_path: str,
     batch_size: int,
-    image_size: int,
     device: str,
     progress_bar: bool,
 ) -> Tuple[float, float, float]:
-    config: Config = pickle.loads(checkpoint['config'])
-    config.parameters['valid_crop'] = image_size
-
-    setup_dataloader(dataset_name=dataset_name, data_path=data_path)
+    setup_dataloader(dataset_name=config.dataset, data_path=data_path)
     loader = create_valid_dataloader(
-        dataset_name=dataset_name, data_path=data_path, batch_size=batch_size,
+        dataset_name=config.dataset, data_path=data_path, batch_size=batch_size,
         num_workers=0, num_cores=1, pin_memory=False, **config.parameters)
 
-    state_dict = checkpoint['state_dict']
     state_dict = {k[6:]: v for k, v in state_dict.items() if k[:6] == 'model.'}
     model = create_model(config.dataset, config.model, **config.parameters)
     model.load_state_dict(state_dict)
@@ -96,17 +91,20 @@ def main() -> None:
     setup_logging(args.debug)
 
     checkpoint = torch.load(args.checkpoint, map_location=lambda s, _: s)
-    config: Config = pickle.loads(checkpoint['config'])
+    config = Config()
+    config.model = checkpoint['config']['model']
+    config.dataset = checkpoint['config']['dataset']
+    config.parameters.update(checkpoint['config']['parameters'])
 
-    if args.dataset is None:
-        args.dataset = config.dataset
+    if args.dataset is not None:
+        config.dataset = args.dataset
 
     if args.data is None:
         root_path = pathlib.Path(__file__).parent.parent
-        args.data = str(root_path / 'data' / args.dataset)
+        args.data = str(root_path / 'data' / config.dataset)
 
-    if args.image_size is None:
-        args.image_size = config.parameters['valid_crop']
+    if args.image_size is not None:
+        config.parameters['valid_crop'] = args.image_size
 
     if args.gpu is not None:
         device = f'cuda:{args.gpu}'
@@ -114,15 +112,14 @@ def main() -> None:
         device = 'cpu'
 
     loss, accuracy1, accuracy5 = evaluate(
-        checkpoint=checkpoint,
-        dataset_name=args.dataset,
+        config=config,
+        state_dict=checkpoint['state_dict'],
         data_path=args.data,
         batch_size=args.batch_size,
-        image_size=args.image_size,
         device=device,
         progress_bar=not args.no_progress)
 
-    print(f'dataset = {args.dataset}')
+    print(f'dataset = {config.dataset}')
     print(f'model = {config.model}')
     print(f'loss = {loss:.6f}')
     print(f'accuracy1 = {accuracy1:.6f}')
