@@ -54,7 +54,7 @@ Following models are trainied using the ImageNet-1k dataset from scratch. The im
 |:---|:---:|:---:|:---|
 |ResNet-34<br>Skip-ResNet-34|21.80M<br>22.72M|3.681G<br>3.694G|[ResNet-34.txt](configs/train/imagenet/ResNet-34.txt)<br>[Skip-ResNet-34.txt](configs/train/imagenet/Skip-ResNet-34.txt)|
 |ResNet-50<br>Skip-ResNet-50|25.56M<br>40.15M|4.138G<br>4.201G|[ResNet-50.txt](configs/train/imagenet/ResNet-50.txt)<br>[Skip-ResNet-50.txt](configs/train/imagenet/Skip-ResNet-50.txt)|
-|ResNeXt-50-32x4d<br>Skip-ResNeXt-50-32x4d|25.03M<br>39.63M|11.46G<br>11.52G|[ResNeXt-50-32x4d.txt](configs/train/imagenet/ResNeXt-50-32x4d.txt)<br>[Skip-ResNeXt-50-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-50-32x4d.txt)|
+|ResNeXt-50-32x4d<br>Skip-ResNeXt-50-32x4d|25.03M<br>39.63M|4.292G<br>4.355G|[ResNeXt-50-32x4d.txt](configs/train/imagenet/ResNeXt-50-32x4d.txt)<br>[Skip-ResNeXt-50-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-50-32x4d.txt)|
 
 ### Results on the ImageNet-1k dataset
 |Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|
