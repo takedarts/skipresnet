@@ -80,8 +80,8 @@ def main() -> None:
         root_path = pathlib.Path(__file__).parent.parent
         args.data = str(root_path / 'data' / args.dataset)
 
-    if args.image_size is None:
-        args.image_size = config.parameters['valid_crop']
+    if args.image_size is not None:
+        config.parameters['valid_crop'] = args.image_size
 
     if args.gpu is not None:
         device = f'cuda:{args.gpu}'
