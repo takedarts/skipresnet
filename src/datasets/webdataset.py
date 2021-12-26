@@ -15,8 +15,7 @@ import torch.utils.data
 import webdataset as wds
 import webdataset.gopen as wdsg
 
-from .augmentation import (make_cutmix_datum, make_labelsmooth_datum,
-                           make_mixup_datum)
+from . import augmentations
 
 try:
     import torch_xla.core.xla_model as xm  # type:ignore
@@ -78,11 +77,17 @@ def apply_mixup_cutmix(
         if image1 is None:
             continue
 
-        if np.random.rand() < mixup_prob:
-            yield make_mixup_datum(
+        if mixup_prob + cutmix_prob > 1.0:
+            mixup_prob /= mixup_prob + cutmix_prob
+            cutmix_prob /= mixup_prob + cutmix_prob
+
+        prob = np.random.rand()
+
+        if prob < mixup_prob:
+            yield augmentations.apply_mixup(
                 image1, target1, image2, target2, mixup_alpha)
-        elif np.random.rand() < cutmix_prob:
-            yield make_cutmix_datum(
+        elif prob < mixup_prob + cutmix_prob:
+            yield augmentations.apply_cutmix(
                 image1, target1, image2, target2, cutmix_alpha)
         else:
             yield image1, target1
@@ -97,7 +102,7 @@ def apply_labelsmooth(
     labelsmooth: float,
 ) -> Generator[Tuple[torch.Tensor, torch.Tensor], None, None]:
     for image, target in dataset:
-        yield make_labelsmooth_datum(image, target, labelsmooth)
+        yield augmentations.apply_labelsmooth(image, target, labelsmooth)
 
 
 class PytorchShardList(wds.PytorchShardList):
