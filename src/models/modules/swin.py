@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
-from typing import Callable
-import itertools
+from typing import Callable, Tuple, Union
 
 
 class PatchMerging(nn.Module):
@@ -11,26 +10,32 @@ class PatchMerging(nn.Module):
         self,
         in_channels: int,
         out_channels: int,
-        stride: int,
+        stride: Union[int, Tuple[int, int]],
         normalization: Callable[..., nn.Module],
         **kwargs,
     ) -> None:
         super().__init__()
-        self.norm = normalization(in_channels * stride * stride)
-        self.reduction = nn.Linear(
-            in_channels * stride * stride, out_channels, bias=False)
+
+        if isinstance(stride, int):
+            stride = (stride, stride)
+
+        channels = in_channels * stride[0] * stride[1]
+
+        self.norm = normalization(channels)
+        self.reduction = nn.Linear(channels, out_channels, bias=False)
+        self.channels = channels
         self.stride = stride
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        B, C, H, W = x.shape
-        x = x.permute(0, 2, 3, 1)
-        xs = [
-            x[:, h::self.stride, w::self.stride, :]
-            for w, h in itertools.product(range(self.stride), repeat=2)]
-        x = torch.cat(xs, dim=3).reshape(B, -1, C * self.stride * self.stride)
+        x = x.reshape(*x.shape[:2], -1, self.stride[0], x.shape[3])
+        x = x.reshape(*x.shape[:4], -1, self.stride[1])
+        x = x.permute(0, 2, 4, 5, 3, 1)
+        height, width = x.shape[1:3]
+
+        x = x.reshape(x.shape[0], -1, self.channels)
         x = self.norm(x)
         x = self.reduction(x)
-        x = x.reshape(B, H // self.stride, W // self.stride, -1)
+        x = x.reshape(x.shape[0], height, width, -1)
         x = x.permute(0, 3, 1, 2)
 
         return x

@@ -16,7 +16,7 @@ import torchvision.datasets
 
 import webdataset as wds
 
-from .transforms import ImageNetPolicy, Lighting, RandAugment
+from .augmentations import AutoAugmentImageNet, Lighting, RandAugment
 from .webdataset import (Processor, PytorchShardList, apply_augmentations,
                          apply_class_to_tensor, gopen, url_opener)
 
@@ -243,7 +243,7 @@ def ImagenetDataset(
             torchvision.transforms.Normalize(mean=mean, std=std)]
 
     if autoaugment:
-        transforms.insert(0, ImageNetPolicy())
+        transforms.insert(0, AutoAugmentImageNet())
 
     if randaugment_num != 0 and randaugment_mag != 0:
         transforms.insert(0, RandAugment(randaugment_num, randaugment_mag))

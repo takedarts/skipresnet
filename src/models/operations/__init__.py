@@ -1,4 +1,5 @@
 from .densenet import DenseNetOperation
+from .efficientnetv2 import EfficientNetV2Operation
 from .mobilenet import MobileNetOperation
 from .nfnet import NFOperation
 from .pre_activation import PreActivationBasicOperation

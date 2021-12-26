@@ -70,8 +70,6 @@ def _count_operations(
          List[Optional[List[int]]],
          List[Optional[List[int]]]],
         Tuple[int, List[Optional[List[int]]]]]],
-
-
 ) -> int:
     name = node.kind()
     attrs = {key: node[key] for key in node.attributeNames()}
@@ -82,10 +80,11 @@ def _count_operations(
     operations, outs = estimators[name](name, attrs, inputs, outputs)
 
     for i in range(len(outputs)):
-        if outputs[i] is not None:
-            continue
         if i < len(outs) and outs[i] is not None:
-            outputs[i] = outs[i]
+            if outputs[i] is None:
+                outputs[i] = outs[i]
+
+            assert outs[i] == outputs[i], f'{outs[i]} != {outputs[i]}'
 
     if LOGGER.isEnabledFor(logging.DEBUG):
         ops_text = f'{operations:,d}'
@@ -100,15 +99,13 @@ def _count_operations(
 
     # estimate of child nodes
     for block in node.blocks():
-        raise NotImplementedError()
+        operations += _count_operations(block, variables, estimators)
 
     return operations
 
 
 def _get_default_estimators(
     strict: bool,
-
-
 ) -> Dict[str, Callable[
         [str, Dict[str, Any],
          List[Optional[List[int]]],
@@ -130,17 +127,29 @@ def _get_default_estimators(
             'onnx::GlobalAveragePool': _estimate_globalavgpool,
             'onnx::GlobalMaxPool': _estimate_globalmaxpool,
             'onnx::Softmax': _estimate_softmax,
+            'onnx::MatMul': _estimate_matmul,
             'onnx::Transpose': _estimate_transpose,
+            'onnx::Cast': _estimate_cast,
             'onnx::Sigmoid': functools.partial(_estimate_operation_n, steps=4),
+            'onnx::Erf': functools.partial(_estimate_operation_n, steps=4),
             'onnx::Relu': functools.partial(_estimate_operation_n, steps=2),
             'onnx::Add': functools.partial(_estimate_operation_n, steps=1),
+            'onnx::Sub': functools.partial(_estimate_operation_n, steps=1),
             'onnx::Mul': functools.partial(_estimate_operation_n, steps=1),
+            'onnx::Div': functools.partial(_estimate_operation_n, steps=1),
+            'onnx::Pow': functools.partial(_estimate_operation_n, steps=1),
+            'onnx::Sqrt': functools.partial(_estimate_operation_n, steps=1),
+            'onnx::ReduceMean': functools.partial(_estimate_operation_n, steps=1),
+            'onnx::ReduceMin': functools.partial(_estimate_operation_n, steps=1),
             'onnx::Concat': _estimate_operation_zero,
             'onnx::Constant': _estimate_operation_zero,
+            'onnx::ConstantOfShape': _estimate_operation_zero,
             'onnx::Flatten': _estimate_operation_zero,
             'onnx::Gather': _estimate_operation_zero,
+            'onnx::Pad': _estimate_operation_zero,
             'onnx::Reshape': _estimate_operation_zero,
             'onnx::Shape': _estimate_operation_zero,
+            'onnx::Slice': _estimate_operation_zero,
             'onnx::Split': _estimate_operation_zero,
             'onnx::Squeeze': _estimate_operation_zero,
             'onnx::Unsqueeze': _estimate_operation_zero,
@@ -155,10 +164,10 @@ def _estimate_unknown_fatal(
     inputs: List[Optional[List[int]]],
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
-    print(name)
-    print(attrs)
-    print(inputs)
-    print(outputs)
+    LOGGER.critical(
+        'Unknown operation:'
+        ' name: %s, attrs: %s, inputs: %s, outputs: %s',
+        name, attrs, inputs, outputs)
     raise Exception(f'Unknown operation: {name}')
 
 
@@ -168,8 +177,26 @@ def _estimate_unknown_warning(
     inputs: List[Optional[List[int]]],
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
-    LOGGER.warning('Unknown operation: %s', name)
+    LOGGER.warn(
+        'Unknown operation:'
+        ' name: %s, attrs: %s, inputs: %s, outputs: %s',
+        name, attrs, inputs, outputs)
     return 0, []
+
+
+def _fatal_no_parameter_shape(
+    name: str,
+    attrs: Dict[str, Any],
+    inputs: List[Optional[List[int]]],
+    outputs: List[Optional[List[int]]],
+) -> Exception:
+    LOGGER.critical(
+        'Fatal in estimating:'
+        ' name: %s, attrs: %s, inputs: %s, outputs: %s',
+        name, attrs, inputs, outputs)
+    return Exception(
+        f'Failed at estimating `{name}`:'
+        + ' the shape of input parameters is not provided.')
 
 
 def _estimate_convNd(
@@ -179,16 +206,12 @@ def _estimate_convNd(
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
     if inputs[1] is None:
-        raise Exception(
-            f'Failed at estimating `{name}`:'
-            + ' the shape of weight parameters is not provided.')
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
     # estimate the shape of the output tensor
     if outputs[0] is None:
         if inputs[0] is None:
-            raise Exception(
-                f'Failed at estimating `{name}`:'
-                + ' the shape of the output tensor can not be estimated.')
+            raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
         kernels = inputs[1][2:]
         pads = attrs['pads']
@@ -202,8 +225,9 @@ def _estimate_convNd(
         output_size = outputs[0]
 
     # count operations of convolutions
+    groups = int(attrs['group'])
     in_channels = inputs[1][1]
-    out_channels = inputs[1][0]
+    out_channels = inputs[1][0] // groups
     kernels = inputs[1][2:]
 
     operations = in_channels * out_channels
@@ -214,8 +238,6 @@ def _estimate_convNd(
         operations += out_channels
 
     # estimate the number of operations
-    groups = int(attrs['group'])
-
     operations *= groups
     operations *= functools.reduce(operator.mul, output_size[2:])
     operations *= output_size[0]
@@ -229,27 +251,15 @@ def _estimate_linear(
     inputs: List[Optional[List[int]]],
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
-    if inputs[1] is None:
-        raise Exception(
-            f'Failed at estimating `{name}`:'
-            + ' the shape of weight parameters is not provided.')
+    operations, output_sizes = _estimate_matmul(name, attrs, inputs, outputs)
 
-    if outputs[0] is None:
-        if inputs[0] is None:
-            raise Exception(
-                f'Failed at estimating `{name}`:'
-                + ' the shape of the output tensor can not be estimated.')
-
-        output_size = [inputs[0][0], inputs[1][0]]
-    else:
-        output_size = outputs[0]
-
-    operations = inputs[1][0] * inputs[1][1]
+    if output_sizes[0] is None:
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
     if len(inputs) == 3:
-        operations += inputs[1][0]
+        operations += functools.reduce(operator.mul, output_sizes[0])
 
-    return operations, [output_size]
+    return operations, output_sizes
 
 
 def _estimate_batchnorm(
@@ -259,13 +269,12 @@ def _estimate_batchnorm(
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
     if inputs[0] is None:
-        raise Exception(
-            f'Failed at estimating `{name}`:'
-            + ' the shape of input parameters is not provided.')
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
+    output_size = inputs[0]
     operations = 2 * functools.reduce(operator.mul, inputs[0])
 
-    return operations, [inputs[0]]
+    return operations, [output_size]
 
 
 def _estimate_avgpool(
@@ -275,9 +284,7 @@ def _estimate_avgpool(
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
     if inputs[0] is None:
-        raise Exception(
-            f'Failed at estimating `{name}`:'
-            + ' the shape of input parameters is not provided.')
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
     if outputs[0] is None:
         kernels = attrs['kernel_shape']
@@ -304,9 +311,7 @@ def _estimate_maxpool(
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
     if inputs[0] is None:
-        raise Exception(
-            f'Failed at estimating `{name}`:'
-            + ' the shape of input parameters is not provided.')
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
     if outputs[0] is None:
         kernels = attrs['kernel_shape']
@@ -333,9 +338,7 @@ def _estimate_globalavgpool(
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
     if inputs[0] is None:
-        raise Exception(
-            f'Failed at estimating `{name}`:'
-            + ' the shape of input parameters is not provided.')
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
     if outputs[0] is None:
         output_size = inputs[0][:2] + [1 for _ in inputs[0][2:]]
@@ -355,9 +358,7 @@ def _estimate_globalmaxpool(
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
     if inputs[0] is None:
-        raise Exception(
-            f'Failed at estimating `{name}`:'
-            + ' the shape of input parameters is not provided.')
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
     if outputs[0] is None:
         output_size = inputs[0][:2] + [1 for _ in inputs[0][2:]]
@@ -377,9 +378,7 @@ def _estimate_softmax(
     outputs: List[Optional[List[int]]],
 ) -> Tuple[int, List[Optional[List[int]]]]:
     if inputs[0] is None:
-        raise Exception(
-            f'Failed at estimating `{name}`:'
-            + ' the shape of input parameters is not provided.')
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
     if outputs[0] is None:
         output_size = inputs[0]
@@ -396,6 +395,32 @@ def _estimate_softmax(
     return operations, [output_size]
 
 
+def _estimate_matmul(
+    name: str,
+    attrs: Dict[str, Any],
+    inputs: List[Optional[List[int]]],
+    outputs: List[Optional[List[int]]],
+) -> Tuple[int, List[Optional[List[int]]]]:
+    if outputs[0] is None:
+        if inputs[0] is None or inputs[1] is None:
+            raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
+
+        output_size = inputs[0][:-1] + inputs[1][-1:]
+    else:
+        output_size = outputs[0]
+
+    if inputs[0] is not None:
+        step = inputs[0][-1]
+    elif inputs[1] is not None:
+        step = inputs[1][-2]
+    else:
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
+
+    operations = step * functools.reduce(operator.mul, output_size)
+
+    return operations, [output_size]
+
+
 def _estimate_operation_n(
     name: str,
     attrs: Dict[str, Any],
@@ -404,9 +429,7 @@ def _estimate_operation_n(
     steps: int,
 ) -> Tuple[int, List[Optional[List[int]]]]:
     if inputs[0] is None:
-        raise Exception(
-            f'Failed at estimating `{name}`:'
-            + ' the shape of input parameters is not provided.')
+        raise _fatal_no_parameter_shape(name, attrs, inputs, outputs)
 
     if outputs[0] is None:
         input_sizes = [v for v in inputs if v is not None]
@@ -416,7 +439,7 @@ def _estimate_operation_n(
     else:
         output_size = outputs[0]
 
-    operations = steps * functools.reduce(operator.mul, output_size)
+    operations = steps * functools.reduce(operator.mul, output_size, 1)
 
     return operations, [output_size]
 
@@ -438,13 +461,20 @@ def _estimate_transpose(
 ) -> Tuple[int, List[Optional[List[int]]]]:
 
     if outputs[0] is None:
-        if inputs[0] is None:
-            raise Exception(
-                f'Failed at estimating `{name}`:'
-                + ' the shape of input parameters is not provided.')
+        if inputs[0] is None or 'perm' not in attrs:
+            return 0, [None]
 
         output_size = [inputs[0][i] for i in attrs['perm']]
     else:
         output_size = outputs[0]
 
     return 0, [output_size]
+
+
+def _estimate_cast(
+    name: str,
+    attrs: Dict[str, Any],
+    inputs: List[Optional[List[int]]],
+    outputs: List[Optional[List[int]]],
+) -> Tuple[int, List[Optional[List[int]]]]:
+    return 0, [inputs[0]]

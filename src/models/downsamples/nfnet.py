@@ -2,9 +2,8 @@ import collections
 from typing import Callable, List, Optional, Tuple
 
 import torch.nn as nn
-from timm.models.layers import ScaledStdConv2dSame
 
-from ..modules import DropBlock, Multiply
+from ..modules import DropBlock, Multiply, ScaledStdConv2dSame
 
 
 class NFDownsample(nn.Sequential):
@@ -40,7 +39,7 @@ class NFDownsample(nn.Sequential):
             modules.extend([
                 ('conv', ScaledStdConv2dSame(
                     in_channels, out_channels, kernel_size=1,
-                    stride=1, padding='same', eps=1e-5)),
+                    stride=1, eps=1e-5, image_size=256)),
                 ('drop', None if not dropblock else DropBlock()),
             ])
 

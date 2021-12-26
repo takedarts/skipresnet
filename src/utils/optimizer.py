@@ -1,30 +1,20 @@
 import torch.nn as nn
 import torch.optim as optim
-
+import torch.nn.modules.batchnorm
 from .optimizers import SAM
 
-NORM_CLASSES = set([
-    nn.BatchNorm1d,
-    nn.BatchNorm2d,
-    nn.BatchNorm3d,
+NORM_CLASSES = (
+    torch.nn.modules.batchnorm._BatchNorm,
     nn.GroupNorm,
     nn.LayerNorm,
-])
+)
 
-BIAS_CLASSES = set([
+BIAS_CLASSES = (
     nn.Conv1d,
     nn.Conv2d,
     nn.Conv3d,
     nn.Linear,
-])
-
-
-def _isinstance(obj, classes):
-    for cls in classes:
-        if isinstance(obj, cls):
-            return True
-
-    return False
+)
 
 
 def create_optimizer(
@@ -46,9 +36,9 @@ def create_optimizer(
         decay_params = []
 
         for name, module in model.named_modules():
-            if _isinstance(module, NORM_CLASSES):
+            if isinstance(module, NORM_CLASSES):
                 norm_names.add(name)
-            elif _isinstance(module, BIAS_CLASSES):
+            elif isinstance(module, BIAS_CLASSES):
                 bias_names.add(f'{name}.bias')
 
         for name, param in model.named_parameters():

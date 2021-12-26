@@ -4,17 +4,19 @@ from typing import Any, List
 import torch
 import torchvision
 
-from .transforms import CIFAR10Policy, RandAugment
+from .augmentations import AutoAugmentCIFAR10
 from .pytorch import apply_augmentations
 
 
 def setup_dataloader(dataset_name: str, data_path: str) -> None:
     if dataset_name == 'cifar10':
-        torchvision.datasets.CIFAR10(data_path, download=True, train=True)
-        torchvision.datasets.CIFAR10(data_path, download=True, train=False)
+        if not (pathlib.Path(data_path) / 'cifar-10-batches-py').is_dir():
+            torchvision.datasets.CIFAR10(data_path, download=True, train=True)
+            torchvision.datasets.CIFAR10(data_path, download=True, train=False)
     elif dataset_name == 'cifar100':
-        torchvision.datasets.CIFAR100(data_path, download=True, train=True)
-        torchvision.datasets.CIFAR100(data_path, download=True, train=False)
+        if not (pathlib.Path(data_path) / 'cifar-100-python').is_dir():
+            torchvision.datasets.CIFAR100(data_path, download=True, train=True)
+            torchvision.datasets.CIFAR100(data_path, download=True, train=False)
     else:
         raise Exception(f'Unsuppoted dataset: {dataset_name}')
 
@@ -193,10 +195,11 @@ class CifarDataset(torch.utils.data.Dataset):
                 torchvision.transforms.Normalize(mean=mean, std=std)]
 
         if autoaugment:
-            transforms.insert(0, CIFAR10Policy())
+            transforms.insert(0, AutoAugmentCIFAR10())
 
         if randaugment_num != 0 and randaugment_mag != 0:
-            transforms.insert(0, RandAugment(randaugment_num, randaugment_mag))
+            transforms.insert(0, torchvision.transforms.RandAugment(
+                randaugment_num, randaugment_mag))
 
         if random_erasing_prob != 0:
             value = 0 if random_erasing_type == 'zero' else 'random'

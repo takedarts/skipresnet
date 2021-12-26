@@ -53,12 +53,12 @@ def make_regnet_layers(
 
 imagenet_params = dict(
     stem=MobileNetStem,
-    head=NoneHead,
-    classifier=LinearClassifier,
     block=BasicBlock,
     operation=RegnetOperation,
     downsample=LinearDownsample,
     junction=AddJunction,
+    head=NoneHead,
+    classifier=LinearClassifier,
 )
 
 imagenet_models = {

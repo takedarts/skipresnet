@@ -22,6 +22,7 @@ import torchmetrics
 from datasets import (create_train_dataloader, create_valid_dataloader,
                       setup_dataloader)
 from models import create_model
+from models.modules import DropBlock
 from utils import (Config, create_optimizer, create_scheduler, setup_logging,
                    setup_random_seed)
 
@@ -154,7 +155,7 @@ class Model(pl.LightningModule):
     def __init__(self, config: Config) -> None:
         super().__init__()
         self.config = config
-        self.model = create_model(config.dataset, config.model, **config.parameters)
+        self.model = create_model(config.model, config.dataset, **config.parameters)
         self.optimizer_states_dict: Optional[Dict] = None
         self.scheduler_states_dict: Optional[Dict] = None
         self.train_logs: List[Dict[str, Any]] = []
@@ -285,6 +286,17 @@ class Model(pl.LightningModule):
             'datetime': time.strftime('%Y/%m/%d %H:%M:%S %Z'),
         })
         gc.collect()
+
+    def on_train_epoch_start(self) -> None:
+        if (self.config.parameters['dropblock_prob'] > 0.0
+                and self.config.parameters['dropblock_size'] > 0):
+            progress = (self.current_epoch + 1) / self.config.parameters['train_epoch']
+            dropblock_prob = self.config.parameters['dropblock_prob'] * progress
+
+            for module in self.model.modules():
+                if isinstance(module, DropBlock):
+                    module.drop_prob = dropblock_prob
+                    module.block_size = self.config.parameters['dropblock_size']
 
     def on_load_checkpoint(self, checkpoint: Dict[str, Any]) -> None:
         self.optimizer_states_dict = {

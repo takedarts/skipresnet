@@ -19,6 +19,6 @@ def test_skipresnet34() -> None:
         message='This model contains a squeeze operation on dimension 1.')
     assert (
         utils.count_operations(
-            models.create_model('imagenet', 'Skip-ResNet-34'),
+            models.create_model('Skip-ResNet-34'),
             torch.randn([1, 3, 224, 224], dtype=torch.float32))
         == 3_694_372_680)

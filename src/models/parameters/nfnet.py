@@ -44,11 +44,13 @@ def make_nfnet_layers(depths, channels, groups, bottleneck, alpha):
 imagenet_params = dict(
     stem=NFNetStem,
     block=PreActivationBlock,
-    downsample=NFDownsample,
     operation=NFOperation,
+    downsample=NFDownsample,
     junction=AddJunction,
     head=NFHead,
     classifier=LinearClassifier,
+    normalization=lambda *args, **kwargs: nn.Identity(),
+    activation=lambda *args, **kwargs: nn.GELU(),
 )
 
 
@@ -61,11 +63,7 @@ imagenet_models = {
         imagenet_params,
         layers=make_nfnet_layers([1, 2, 6, 3], 128, 1, 2, alpha=0.2),
         stem_channels=128, head_channels=3072,
-        stem=NFNetStem, block=PreActivationBlock, operation=NFOperation,
-        downsample=NFDownsample, head=NFHead,
         semodule=True, semodule_reduction=2,
-        normalization=lambda *args, **kwargs: nn.Identity(),
-        activation=lambda *args, **kwargs: nn.GELU(),
         alpha=0.4, gamma=1.7015043497085571,
         timm_name='dm_nfnet_f0',
         timm_loader=load_nfnet_parameters),
@@ -74,11 +72,7 @@ imagenet_models = {
         imagenet_params,
         layers=make_nfnet_layers([2, 4, 12, 6], 128, 1, 2, alpha=0.2),
         stem_channels=128, head_channels=3072,
-        stem=NFNetStem, block=PreActivationBlock, operation=NFOperation,
-        downsample=NFDownsample, head=NFHead,
         semodule=True, semodule_reduction=2,
-        normalization=lambda *args, **kwargs: nn.Identity(),
-        activation=lambda *args, **kwargs: nn.GELU(),
         alpha=0.4, gamma=1.7015043497085571,
         timm_name='dm_nfnet_f1',
         timm_loader=load_nfnet_parameters),

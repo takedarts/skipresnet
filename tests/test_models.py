@@ -33,6 +33,11 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('EfficientNet-B2', 'efficientnet_b2', 224),
     ('EfficientNet-B3', 'efficientnet_b3', 224),
 
+    # EfficientNetV2s
+    ('EfficientNetV2-S', 'tf_efficientnetv2_s', 224),
+    ('EfficientNetV2-M', 'tf_efficientnetv2_m', 224),
+    ('EfficientNetV2-L', 'tf_efficientnetv2_l', 224),
+
     # RegNets
     ('RegNetX-0.8', 'regnetx_008', 224),
     ('RegNetX-1.6', 'regnetx_016', 224),
@@ -52,6 +57,8 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     # ViTs
     ('ViTSmallPatch16-224', 'vit_small_patch16_224', 224),
     ('ViTBasePatch16-224', 'vit_base_patch16_224', 224),
+    ('ViTSmallPatch16-384', 'vit_small_patch16_384', 384),
+    ('ViTBasePatch16-384', 'vit_base_patch16_384', 384),
 
     # SwinTransformers
     ('SwinTinyPatch4-224', 'swin_tiny_patch4_window7_224', 224),
@@ -74,7 +81,7 @@ random_model_names = [
     ids=[n for n, _, _ in pretrained_model_names])
 def test_pretrained_models(model_name: str, timm_model_name: str, image_size: int) -> None:
     timm_model = timm.create_model(timm_model_name, pretrained=True)
-    model = models.create_model('imagenet', model_name, pretrained=True)
+    model = models.create_model(model_name, 'imagenet', pretrained=True)
 
     _test_model(model, timm_model, image_size=image_size)
 
@@ -88,7 +95,7 @@ def test_random_models(model_name: str, timm_model_name: str, image_size: int) -
     for parameter in timm_model.parameters():
         nn.init.normal_(parameter, 0.0, 0.1)
 
-    model = models.create_model('imagenet', model_name)
+    model = models.create_model(model_name, 'imagenet')
     model.load_model_parameters(timm_model)
 
     _test_model(model, timm_model, image_size=image_size)

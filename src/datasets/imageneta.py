@@ -1,20 +1,18 @@
-import hashlib
 import os
 import pathlib
 import tarfile
+from typing import List, Tuple
 
-import requests
+import PIL.Image
 import torch
 import torch.utils.data
 import torchvision.datasets
 import torchvision.transforms
-import tqdm
-import PIL.Image
-
-from typing import List, Tuple
+from utils import download_and_verify
 
 ARCHIVE_URL = 'https://people.eecs.berkeley.edu/~hendrycks/imagenet-a.tar'
-ARCHIVE_MD5 = 'c3e55429088dc681f30d81f4726b6595'
+ARCHIVE_DIGEST = 'md5:c3e55429088dc681f30d81f4726b6595'
+ARCHIVE_SIZE = 687_552_512
 
 
 def setup_dataloader(dataset_name: str, data_path: str) -> None:
@@ -60,36 +58,20 @@ class ImageNetADataset(torch.utils.data.Dataset):
 
     @staticmethod
     def prepare(path: pathlib.Path) -> None:
-        if (path / 'imagenet-a').is_dir():
-            return
+        archive_path = path / 'imagenet-a.tar'
 
-        if not (path / 'imagenet-a.tar').is_file():
-            ImageNetADataset.download(path)
+        os.makedirs(path, exist_ok=True)
 
-        with tarfile.open(path / 'imagenet-a.tar', 'r') as reader:
+        if not archive_path.is_file():
+            download_and_verify(
+                path=archive_path,
+                url=ARCHIVE_URL,
+                digest=ARCHIVE_DIGEST,
+                size=ARCHIVE_SIZE,
+            )
+
+        with tarfile.open(archive_path, 'r') as reader:
             reader.extractall(path)
-
-    @staticmethod
-    def download(path: pathlib.Path) -> None:
-        response = requests.get(ARCHIVE_URL, stream=True)
-        md5 = hashlib.md5()
-
-        with tqdm.tqdm(
-                total=int(response.headers['content-length']),
-                unit='B', unit_scale=True) as progbar:
-            with open(path / 'imagenet-a.tar.download', 'wb') as writer:
-                for chunk in response.iter_content(chunk_size=1024):
-                    writer.write(chunk)
-                    md5.update(chunk)
-                    progbar.update(len(chunk))
-
-        if md5.hexdigest() != ARCHIVE_MD5:
-            os.remove(path / 'imagenet-a.tar.download')
-            raise Exception(
-                'MD5 of the download file is {}, but expected is {}'.format(
-                    md5.hexdigest(), ARCHIVE_MD5))
-
-        os.rename(path / 'imagenet-a.tar.download', path / 'imagenet-a.tar')
 
     def __init__(
         self,

@@ -20,8 +20,8 @@ class _Block(nn.Module):
         normalization: Callable[..., nn.Module],
         activation: Callable[..., nn.Module],
         dropblock: float,
-        shakedrop: float,
-        stochdepth: float,
+        shakedrop_prob: float,
+        stochdepth_prob: float,
         signalaugment: float,
         **kwargs
     ) -> None:
@@ -50,11 +50,11 @@ class _Block(nn.Module):
                  SignalAugmentation(std=signalaugment)
                  if signalaugment > 0.0 else None),
                 ('shakedrop',
-                 ShakeDrop(drop_prob=shakedrop * (index + 1) / len(settings))
-                 if shakedrop > 0.0 else None),
+                 ShakeDrop(drop_prob=shakedrop_prob * (index + 1) / len(settings))
+                 if shakedrop_prob > 0.0 else None),
                 ('stochdepth',
-                 StochasticDepth(drop_prob=stochdepth * (index + 1) / len(settings))
-                 if stochdepth > 0.0 else None),
+                 StochasticDepth(drop_prob=stochdepth_prob * (index + 1) / len(settings))
+                 if stochdepth_prob > 0.0 else None),
             ] if m is not None))
 
         # junction

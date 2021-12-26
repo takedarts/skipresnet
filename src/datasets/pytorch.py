@@ -4,8 +4,7 @@ import numpy as np
 import torch
 import torch.utils.data
 
-from .augmentation import (make_cutmix_datum, make_labelsmooth_datum,
-                           make_mixup_datum)
+from . import augmentations
 
 
 def apply_augmentations(
@@ -50,12 +49,20 @@ class MixupCutmix(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         image1, target1 = self.dataset[idx]
         image2, target2 = self.dataset[np.random.randint(len(self.dataset))]
+        mixup_prob = self.mixup_prob
+        cutmix_prob = self.cutmix_prob
 
-        if np.random.rand() < self.mixup_prob:
-            return make_mixup_datum(
+        if mixup_prob + cutmix_prob > 1.0:
+            mixup_prob /= mixup_prob + cutmix_prob
+            cutmix_prob /= mixup_prob + cutmix_prob
+
+        prob = np.random.rand()
+
+        if prob < mixup_prob:
+            return augmentations.apply_mixup(
                 image1, target1, image2, target2, self.mixup_alpha)
-        elif np.random.rand() < self.cutmix_prob:
-            return make_cutmix_datum(
+        elif prob < mixup_prob + cutmix_prob:
+            return augmentations.apply_cutmix(
                 image1, target1, image2, target2, self.cutmix_alpha)
         else:
             return image1, target1
@@ -76,4 +83,5 @@ class LabelSmooth(torch.utils.data.Dataset):
 
     def __getitem__(self, idx: int) -> Any:
         image, target = self.dataset[idx]
-        return make_labelsmooth_datum(image, target, self.labelsmooth)
+        return augmentations.apply_labelsmooth(
+            image, target, self.labelsmooth)

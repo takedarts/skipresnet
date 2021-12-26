@@ -1,5 +1,5 @@
 import torch.nn as nn
-import numpy
+import numpy as np
 
 
 class StochasticDepth(nn.Module):
@@ -9,14 +9,12 @@ class StochasticDepth(nn.Module):
         self.drop_prob = drop_prob
 
     def forward(self, x):
-        if self.drop_prob == 0.0:
+        if not self.training or self.drop_prob == 0.0:
             return x
-        elif not self.training:
-            return x * (1.0 - self.drop_prob)
-        elif numpy.random.rand() < self.drop_prob:
-            return x * 0
         else:
-            return x
+            d = float(np.random.rand() >= self.drop_prob)
+            r = 1.0 - self.drop_prob
+            return x * d / r
 
     def extra_repr(self):
         return 'drop={}'.format(self.drop_prob)

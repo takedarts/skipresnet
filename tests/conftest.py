@@ -8,3 +8,4 @@ if SRC_PATH not in sys.path:
 import utils
 
 utils.setup_logging(True)
+utils.setup_random_seed(2021)

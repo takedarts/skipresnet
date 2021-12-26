@@ -30,12 +30,12 @@ def make_resnet_layers(depths, channels, groups, bottleneck):
 
 imagenet_params = dict(
     stem=LargeStem,
-    head=NoneHead,
-    classifier=LinearClassifier,
     block=BasicBlock,
     operation=BasicOperation,
     downsample=LinearDownsample,
     junction=AddJunction,
+    head=NoneHead,
+    classifier=LinearClassifier,
 )
 
 imagenet_models = {
@@ -139,12 +139,12 @@ imagenet_models = {
 
 cifar_params = dict(
     stem=SmallStem,
-    head=NoneHead,
-    classifier=LinearClassifier,
     block=BasicBlock,
     operation=BasicOperation,
     downsample=LinearDownsample,
     junction=AddJunction,
+    head=NoneHead,
+    classifier=LinearClassifier,
 )
 
 cifar_models = {

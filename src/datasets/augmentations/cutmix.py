@@ -3,26 +3,7 @@ import numpy as np
 from typing import Tuple
 
 
-def make_mixup_datum(
-    image1: torch.Tensor,
-    target1: torch.Tensor,
-    image2: torch.Tensor,
-    target2: torch.Tensor,
-    alpha: float
-) -> Tuple[torch.Tensor, torch.Tensor]:
-    lam = np.random.beta(alpha, alpha)
-    lam = 1 - lam if lam < 0.5 else lam
-
-    # generate mixed image
-    image = lam * image1 + (1 - lam) * image2
-
-    # generate mixed probability
-    target = lam * target1 + (1 - lam) * target2
-
-    return image, target
-
-
-def make_cutmix_datum(
+def apply_cutmix(
     image1: torch.Tensor,
     target1: torch.Tensor,
     image2: torch.Tensor,
@@ -58,13 +39,3 @@ def _get_rand_bbox(width: int, height: int, lam: float) -> Tuple[int, int, int, 
     bby2 = np.clip(cy + cut_h // 2, 0, height)
 
     return bbx1, bby1, bbx2, bby2
-
-
-def make_labelsmooth_datum(
-    image: torch.Tensor,
-    target: torch.Tensor,
-    labelsmooth: float
-) -> Tuple[torch.Tensor, torch.Tensor]:
-    target *= 1.0 - labelsmooth
-    target += labelsmooth / target.shape[0]
-    return image, target

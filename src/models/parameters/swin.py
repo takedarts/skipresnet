@@ -72,27 +72,30 @@ imagenet_models = {
     'SwinTinyPatch4-224': clone_params(
         imagenet_params,
         layers=make_swin_layers(
-            [2, 2, 6, 2], 96, feature_size=56, window_size=7, attn_heads=3),
+            depths=[2, 2, 6, 2], channels=96,
+            feature_size=56, window_size=7, attn_heads=3),
         stem_channels=96, head_channels=768,
-        patch_size=4, image_size=224, mlp_ratio=4.0,
+        patch_size=4, mlp_ratio=4.0,
         timm_name='swin_tiny_patch4_window7_224',
         timm_loader=load_swin_parameters),
 
     'SwinSmallPatch4-224': clone_params(
         imagenet_params,
         layers=make_swin_layers(
-            [2, 2, 18, 2], 96, feature_size=56, window_size=7, attn_heads=3),
+            depths=[2, 2, 18, 2], channels=96,
+            feature_size=56, window_size=7, attn_heads=3),
         stem_channels=96, head_channels=768,
-        patch_size=4, image_size=224, mlp_ratio=4.0,
+        patch_size=4, mlp_ratio=4.0,
         timm_name='swin_small_patch4_window7_224',
         timm_loader=load_swin_parameters),
 
     'SwinBasePatch4-224': clone_params(
         imagenet_params,
         layers=make_swin_layers(
-            [2, 2, 18, 2], 128, feature_size=56, window_size=7, attn_heads=4),
+            depths=[2, 2, 18, 2], channels=128,
+            feature_size=56, window_size=7, attn_heads=4),
         stem_channels=128, head_channels=1024,
-        patch_size=4, image_size=224, mlp_ratio=4.0,
+        patch_size=4, mlp_ratio=4.0,
         timm_name='swin_base_patch4_window7_224',
         timm_loader=load_swin_parameters),
 }

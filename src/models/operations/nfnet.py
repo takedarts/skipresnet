@@ -3,9 +3,9 @@ from typing import Callable, Union
 
 import torch
 import torch.nn as nn
-from timm.models.layers import ScaledStdConv2dSame
 
-from ..modules import DropBlock, Multiply, SEModule
+
+from ..modules import DropBlock, Multiply, SEModule, ScaledStdConv2dSame
 
 
 class NFOperation(nn.Module):
@@ -37,33 +37,33 @@ class NFOperation(nn.Module):
         self.alpha = alpha
         self.gain = nn.Parameter(torch.tensor(0.0))
 
-        channels = max(out_channels // bottleneck, 1)
+        channels = max(round(out_channels // bottleneck), 1)
 
         self.op = nn.Sequential(collections.OrderedDict((n, m) for n, m in [
             ('act1', activation(inplace=True)),
             ('gamma1', Multiply(gamma, inplace=True)),
             ('beta', Multiply(beta, inplace=True)),
             ('conv1', ScaledStdConv2dSame(
-                in_channels, channels, kernel_size=1, padding='same',
-                stride=1, groups=1, eps=1e-5)),
+                in_channels, channels, kernel_size=1,
+                stride=1, groups=1, eps=1e-5, image_size=256)),
             ('drop1', None if not dropblock else DropBlock()),
             ('act2', activation(inplace=True)),
             ('gamma2', Multiply(gamma, inplace=True)),
             ('conv2', ScaledStdConv2dSame(
-                channels, channels, kernel_size=3, padding='same',
-                stride=stride, groups=groups, eps=1e-5)),
+                channels, channels, kernel_size=3,
+                stride=stride, groups=groups, eps=1e-5, image_size=256)),
             ('drop2', None if not dropblock else DropBlock()),
             ('act3', activation(inplace=True)),
             ('gamma3', Multiply(gamma, inplace=True)),
             ('conv3', ScaledStdConv2dSame(
-                channels, channels, kernel_size=3, padding='same',
-                stride=1, groups=groups, eps=1e-5)),
+                channels, channels, kernel_size=3,
+                stride=1, groups=groups, eps=1e-5, image_size=256)),
             ('drop3', None if not dropblock else DropBlock()),
             ('act4', activation(inplace=True)),
             ('gamma4', Multiply(gamma, inplace=True)),
             ('conv4', ScaledStdConv2dSame(
-                channels, out_channels, kernel_size=1, padding='same',
-                stride=1, groups=1, eps=1e-5)),
+                channels, out_channels, kernel_size=1,
+                stride=1, groups=1, eps=1e-5, image_size=256)),
             ('drop4', None if not dropblock else DropBlock()),
             ('semodule', None if not semodule else SEModule(
                 out_channels,

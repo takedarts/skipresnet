@@ -1,12 +1,14 @@
-# This code is 'AutoAugment' imported from
-#   https://github.com/DeepVoltaire/AutoAugment.
-# This is published under MIT License (2020/08/25).
+'''
+This is a 'AutoAugment' implementation imported from
+   https://github.com/DeepVoltaire/AutoAugment
+which is published under MIT License (2021/12/14).
+'''
 from PIL import Image, ImageEnhance, ImageOps
 import numpy as np
 import random
 
 
-class ImageNetPolicy(object):
+class AutoAugmentImageNet(object):
     """ Randomly choose one of the best 24 Sub-policies on ImageNet.
 
         Example:
@@ -61,7 +63,7 @@ class ImageNetPolicy(object):
         return "AutoAugment ImageNet Policy"
 
 
-class CIFAR10Policy(object):
+class AutoAugmentCIFAR10(object):
     """ Randomly choose one of the best 25 Sub-policies on CIFAR10.
 
         Example:
@@ -116,7 +118,7 @@ class CIFAR10Policy(object):
         return "AutoAugment CIFAR10 Policy"
 
 
-class SVHNPolicy(object):
+class AutoAugmentSVHN(object):
     """ Randomly choose one of the best 25 Sub-policies on SVHN.
 
         Example:

@@ -1,5 +1,6 @@
 from .batchnorm import FrozenBatchNorm2d
 from .blurpool import BlurPool2d
+from .conv2d_same import Conv2dSame
 from .dropblock import DropBlock
 from .multiply import Multiply
 from .reshape import ChannelPad, Reshape
@@ -8,7 +9,7 @@ from .shakedrop import ShakeDrop
 from .sigmoid import HSigmoid
 from .signal_augmentation import SignalAugmentation
 from .split_attention import SplitAttentionModule
-from .stdconv import ScaledStdConv2d
+from .stdconv import ScaledStdConv2d, ScaledStdConv2dSame
 from .stochastic_depth import StochasticDepth
-from .swish import HSwish, Swish
 from .swin import PatchMerging
+from .swish import HSwish, Swish

@@ -40,12 +40,11 @@ def make_pyramid_layers(
 cifar_params = dict(
     stem=PreActSmallStem,
     block=PreActivationBlock,
-    downsample=AverageDownsample,
     operation=SingleActivationBasicOperation,
+    downsample=AverageDownsample,
+    junction=AddJunction,
     head=PreActivationHead,
     classifier=LinearClassifier,
-    junction=AddJunction
-
 )
 
 cifar_models = {

@@ -2,9 +2,8 @@ import collections
 from typing import Callable
 
 import torch.nn as nn
-from timm.models.layers import ScaledStdConv2dSame
 
-from ..modules import Multiply
+from ..modules import Multiply, ScaledStdConv2dSame
 
 
 class NFHead(nn.Sequential):
@@ -24,7 +23,7 @@ class NFHead(nn.Sequential):
         super().__init__(collections.OrderedDict((n, m) for n, m in [
             ('conv', ScaledStdConv2dSame(
                 in_channels, out_channels, kernel_size=1,
-                padding='same', stride=1, eps=1e-5)),
+                stride=1, eps=1e-5, image_size=256)),
             ('act', activation(inplace=True)),
             ('gamma', Multiply(gamma, inplace=True)),
         ] if m is not None))

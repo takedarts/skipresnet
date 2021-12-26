@@ -3,7 +3,7 @@ This is a module for building an image classification model.
 Copyright 2021 Atsushi TAKEDA
 '''
 import itertools
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import torch
 import torch.nn as nn
@@ -34,7 +34,6 @@ class Model(nn.Module):
         layers: List[Tuple[int, int, Dict[str, Any]]],
         stem_channels: int,
         head_channels: int,
-        dropout: float,
         pretrained: bool = False,
         timm_name: Optional[str] = None,
         timm_loader: Optional[Callable[[nn.Module, nn.Module], None]] = None,
@@ -58,7 +57,6 @@ class Model(nn.Module):
         self.stem = stem(stem_channels, **kwargs)
         self.blocks = nn.ModuleList(blocks)
         self.head = head(channels[-1], head_channels, **kwargs)
-        self.dropout = nn.Dropout(p=dropout, inplace=True)
         self.classifier = classifier(head_channels, **kwargs)
 
         # loader
@@ -88,7 +86,6 @@ class Model(nn.Module):
     def get_prediction(self, x: torch.Tensor, aggregation: bool = True) -> torch.Tensor:
         if aggregation:
             x = F.adaptive_avg_pool2d(x, (1, 1))
-            x = self.dropout(x)
             x = self.classifier(x)
             x = x.reshape(x.shape[0], -1)
         else:
@@ -122,7 +119,22 @@ class Model(nn.Module):
         self.load_model_parameters(model)
 
 
-def create_model(dataset_name, model_name, **kwargs):
+def create_model(
+    model_name: str,
+    dataset_name_or_num_classes: Union[str, int],
+    **kwargs,
+) -> 'Model':
+    if isinstance(dataset_name_or_num_classes, int):
+        num_classes = dataset_name_or_num_classes
+    elif dataset_name_or_num_classes in ('imagenet',):
+        num_classes = 1000
+    elif dataset_name_or_num_classes in ('cifar100',):
+        num_classes = 100
+    elif dataset_name_or_num_classes in ('cifar10', 'dummy'):
+        num_classes = 10
+    else:
+        raise Exception(f'Unsupported dataset: {dataset_name_or_num_classes}')
+
     model_params = dict(
         normalization=nn.BatchNorm2d,
         activation=nn.ReLU,
@@ -135,13 +147,28 @@ def create_model(dataset_name, model_name, **kwargs):
         gate_normalization=nn.BatchNorm2d,
         gate_activation=nn.ReLU,
         gate_connections=4,
-        dropout=0.0,
-        shakedrop=0.0,
-        stochdepth=0.0,
+        dropout_prob=0.0,
+        shakedrop_prob=0.0,
+        stochdepth_prob=0.0,
         signalaugment=0.0,
     )
 
-    model_params.update(PARAMETERS[dataset_name][model_name])
+    model_params.update(PARAMETERS[model_name])
     model_params.update(kwargs)
+    model_params.update(num_classes=num_classes)
 
-    return Model(**model_params)
+    return Model(**model_params)  # type:ignore
+
+
+def create_model_from_checkpoint(checkpoint: Dict[str, Any]) -> 'Model':
+    model_name = checkpoint['config']['model']
+    dataset_name = checkpoint['config']['dataset']
+    parameters = checkpoint['config']['parameters']
+
+    state_dict = checkpoint['state_dict']
+    state_dict = {k[6:]: v for k, v in state_dict.items() if k[:6] == 'model.'}
+
+    model = create_model(model_name, dataset_name, ** parameters)
+    model.load_state_dict(state_dict)
+
+    return model

@@ -1,1 +1,1 @@
-from .linear import LinearClassifier
+from .linear import LinearClassifier, LinearClassifierWithoutDropout

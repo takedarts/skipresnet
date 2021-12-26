@@ -4,7 +4,7 @@ from ..heads import PreActivationHead
 from ..operations import DenseNetOperation
 from ..downsamples import NoneDownsample
 from ..junctions import ConcatJunction
-from ..classifiers import LinearClassifier
+from ..classifiers import LinearClassifierWithoutDropout
 from ..loaders import load_densenet_parameters
 
 
@@ -34,11 +34,11 @@ def make_densenet_layers(depths, channels, growth, expansion):
 imagenet_params = dict(
     stem=LargeStem,
     block=DenseNetBlock,
-    downsample=NoneDownsample,
     operation=DenseNetOperation,
+    downsample=NoneDownsample,
     junction=ConcatJunction,
     head=PreActivationHead,
-    classifier=LinearClassifier,
+    classifier=LinearClassifierWithoutDropout,
 )
 
 imagenet_models = {

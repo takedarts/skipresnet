@@ -3,9 +3,8 @@ import math
 from typing import Callable
 
 import torch.nn as nn
-from timm.models.layers import ScaledStdConv2dSame
 
-from ..modules import Multiply
+from ..modules import Multiply, ScaledStdConv2dSame
 
 
 class NFNetStem(nn.Sequential):
@@ -26,21 +25,21 @@ class NFNetStem(nn.Sequential):
 
         super().__init__(collections.OrderedDict(m for m in [
             ('conv1', ScaledStdConv2dSame(
-                3, mid_channels * 1,
-                kernel_size=3, stride=2, padding='same', eps=1e-05)),
+                3, mid_channels * 1, kernel_size=3,
+                stride=2, eps=1e-05, image_size=256)),
             ('act1', activation(inplace=True)),
             ('mul1', Multiply(gamma, inplace=True)),
             ('conv2', ScaledStdConv2dSame(
                 mid_channels * 1, mid_channels * 2,
-                kernel_size=3, stride=1, padding='same', eps=1e-05)),
+                kernel_size=3, stride=1, eps=1e-05, image_size=256)),
             ('act2', activation(inplace=True)),
             ('mul2', Multiply(gamma, inplace=True)),
             ('conv3', ScaledStdConv2dSame(
                 mid_channels * 2, mid_channels * 4,
-                kernel_size=3, stride=1, padding='same', eps=1e-05)),
+                kernel_size=3, stride=1, eps=1e-05, image_size=256)),
             ('act3', activation(inplace=True)),
             ('mul3', Multiply(gamma, inplace=True)),
             ('conv4', ScaledStdConv2dSame(
-                mid_channels * 4, out_channels,
-                kernel_size=3, stride=2, padding='same', eps=1e-05)),
+                mid_channels * 4, out_channels, kernel_size=3,
+                stride=2, eps=1e-05, image_size=256)),
         ] if m[1] is not None))

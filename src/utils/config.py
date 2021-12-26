@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 PARAMETERS: List[Tuple[str, Any, str]] = [
     ('train_batch', 64, 'Batch size at training.'),
@@ -8,7 +8,7 @@ PARAMETERS: List[Tuple[str, Any, str]] = [
     ('train_optim', 'sgd', 'Optimizer at training (sgd/rmsprop/adamw/sam).'),
     ('train_lr', 0.025, 'Initial learning rate at training'),
     ('train_wdecay', 0.0001, 'Weight decay (L2 penalty) at training.'),
-    ('train_bdecay', False, 'Adaptation of decay (L2 penalty) to bias parameters.'),
+    ('train_bdecay', False, 'Weight decay (L2 penalty) is adapted to bias parameters.'),
     ('train_schedule', 'cosine', 'Learning rate schedule at training (cosine/exponential).'),
     ('valid_crop', 224, 'Input image size at validation.'),
     ('cutmix_alpha', 1.0, 'Distribution parameter Alpha of CutMix at training.'),
@@ -19,7 +19,7 @@ PARAMETERS: List[Tuple[str, Any, str]] = [
     ('randomerasing_type', 'random', 'Type of RandomErasing (random/zero).'),
     ('randaugment_num', 0, 'Number of transformations in RandAugment.'),
     ('randaugment_mag', 0, 'Magnitude of transformations in RandAugment.'),
-    ('autoaugment', False, 'Use auto augumentation.'),
+    ('autoaugment', False, 'Auto augumentation is used.'),
     ('labelsmooth', 0.0, 'Factor "k" of label smoothing.'),
     ('gradclip_value', 0.0, 'Threshold of gradient value clipping.'),
     ('gradclip_norm', 0.0, 'Threshold of gradient norm clipping.'),
@@ -29,11 +29,19 @@ PARAMETERS: List[Tuple[str, Any, str]] = [
     ('dropblock_size', 7, 'Drop block size of DropBlock.'),
     ('stochdepth_prob', 0.0, 'Drop probability of stochastic depth.'),
     ('signalaugment', 0.0, 'Standard deviation of signal augmentation.'),
-    ('pretrained', False, 'Load pretrained weights from pytorch-image-models (timm).'),
+    ('pretrained', False, 'Pretrained weights from pytorch-image-models (timm) is loaded.'),
 ]
 
 
 class Config(object):
+    @staticmethod
+    def create_from_checkpoint(checkpoint: Dict[str, Any]) -> 'Config':
+        config = Config()
+        config.model = checkpoint['config']['model']
+        config.dataset = checkpoint['config']['dataset']
+        config.parameters.update(checkpoint['config']['parameters'])
+        return config
+
     def __init__(self, file_or_stream: Any = None) -> None:
         self.model = ''
         self.dataset = ''
