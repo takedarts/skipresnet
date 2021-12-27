@@ -77,6 +77,8 @@ Following models are trainied using the CIFAR-10/100 dataset from scratch. No ex
 |Model|top-1 acc. (CIFAR-10)|top-1 acc (CIFAR-100)|
 |:---|:---:|:---:|
 |ResNet-110<sub>(5)</sub><br>Skip-ResNet-110<sub>(5)</sub>|0.9623<br>0.9660|0.7798<br>0.7988|
+|WideResNet-28-k10<sub>(5)</sub><br>Skip-WideResNet-28-k10<sub>(5)</sub>|0.9787<br>0.9780|0.8425<br>0.8508|
+|WideResNet-40-k10<sub>(5)</sub><br>Skip-WideResNet-40-k10<sub>(5)</sub>|0.9793<br>0.9792|0.8439<br>0.8498|
 
 # Acknowledgement
 This work is supported by JSPS KAKENHI Grant Number JP20K11871, and a part of this experiment is supported by the TPU Research Cloud program.
