@@ -23,6 +23,7 @@ def create_optimizer(
     train_lr: float,
     train_momentum: float,
     train_eps: float,
+    train_alpha: float,
     train_wdecay: float,
     train_bdecay: bool,
     **kwargs,
@@ -61,7 +62,8 @@ def create_optimizer(
             parameters, lr=train_lr, momentum=train_momentum, nesterov=True)
     elif train_optim == 'rmsprop':
         return optim.RMSprop(
-            parameters, lr=train_lr, momentum=train_momentum, eps=train_eps)
+            parameters, lr=train_lr,
+            alpha=train_alpha, momentum=train_momentum, eps=train_eps)
     elif train_optim == 'adamw':
         return optim.AdamW(parameters, lr=train_lr, eps=train_eps)
     elif train_optim == 'sam':
