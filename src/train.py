@@ -401,8 +401,8 @@ class NeptuneLogger(pll.NeptuneLogger):
         project_name = neptune_name.split('/', maxsplit=1)
         user_name, api_token = self._load_config()
         kwargs['api_key'] = re.sub(r'\s+', '', api_token)
-        kwargs['project_name'] = f'{user_name}/{project_name[0]}'
-        kwargs['experiment_name'] = project_name[-1]
+        kwargs['project'] = f'{user_name}/{project_name[0]}'
+        kwargs['name'] = project_name[-1]
 
         if (save_path / 'neptune.json').is_file():
             with open(save_path / 'neptune.json', 'r') as reader:
