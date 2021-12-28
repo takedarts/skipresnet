@@ -1,6 +1,5 @@
 from .densenet import load_densenet_parameters
 from .efficientnet import load_efficientnet_parameters
-from .efficientnetv2 import load_efficientnetv2_parameters
 from .mobilenet import load_mobilenetv2_parameters, load_mobilenetv3_parameters
 from .nfnet import load_nfnet_parameters
 from .regnet import load_regnet_parameters

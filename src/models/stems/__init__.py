@@ -1,5 +1,5 @@
 from .base import DeepLargeStem, LargeStem, SmallStem
-from .efficientnetv2 import EfficientNetV2Stem
+from .efficientnet import EfficientNetStem
 from .mobilenet import MobileNetStem
 from .nfnet import NFNetStem
 from .pre_activation import PreActSmallStem

@@ -1,18 +1,16 @@
-import math
+import functools
 from typing import Any, Callable, Dict, List, Tuple
-
+import math
 import torch.nn as nn
 
 from ..blocks import MobileNetBlock
 from ..classifiers import LinearClassifier
 from ..downsamples import NoneDownsample
-from ..heads import MobileNetV2Head, MobileNetV3Head
+from ..heads import MobileNetV2Head
 from ..junctions import AddJunction
-from ..loaders import (load_efficientnet_parameters,
-                       load_mobilenetv2_parameters,
-                       load_mobilenetv3_parameters)
-from ..operations import MobileNetOperation
-from ..stems import MobileNetStem
+from ..loaders import load_efficientnet_parameters
+from ..operations import EfficientNetOperation
+from ..stems import EfficientNetStem
 
 
 def clone_params(params, **kwargs):
@@ -22,7 +20,8 @@ def clone_params(params, **kwargs):
     return new_params
 
 
-def make_mobilenet_layer(
+def make_efficientnetv2_layer(
+    style: str,
     kernel: int,
     channels: int,
     stride: int,
@@ -38,182 +37,193 @@ def make_mobilenet_layer(
     if new_channels < 0.9 * channels:
         new_channels += divisor
 
-    params = {
-        'kernel': kernel,
-        'expansion': expansion,
-        'semodule': semodule,
-        'semodule_reduction': semodule_reduction,
-        'semodule_divisor': semodule_divisor,
-        'activation': activation}
+    params = dict(
+        style=style,
+        kernel=kernel,
+        expansion=expansion,
+        semodule=semodule,
+        semodule_reduction=semodule_reduction,
+        semodule_divisor=semodule_divisor,
+        activation=activation)
 
     return (new_channels, stride, params)
 
 
-def make_mobilenet_layers(
-    settings: List,
-    width: float,
-    depth: float,
+def make_efficientnetv2_layers(
+    settings: List[Tuple[str, int, int, int, int, Any, int, bool, int, int]],
     divisor: int,
 ) -> List[Tuple[int, int, Dict[str, Any]]]:
     layers = []
 
-    for (
-        kernel,
-        channels,
-        stride,
-        expansion,
-        semodule,
-        semodule_reduction,
-        semodule_divisor,
-        activation,
-        repeats,
-    ) in settings:
-        repeats = math.ceil(repeats * depth)
-        params = {
-            'kernel': kernel,
-            'channels': int(channels * width),
-            'expansion': expansion,
-            'semodule': semodule,
-            'semodule_reduction': semodule_reduction,
-            'semodule_divisor': semodule_divisor,
-            'activation': activation,
-            'divisor': divisor,
-        }
-        layers.append(make_mobilenet_layer(stride=stride, **params))
-        layers.extend(make_mobilenet_layer(stride=1, **params) for _ in range(repeats - 1))
+    for (style, kernel, channels, stride, expansion, activation, repeats,
+         semodule, semodule_reduction, semodule_divisor) in settings:
+        params = dict(
+            style=style,
+            kernel=kernel,
+            channels=channels,
+            expansion=expansion,
+            divisor=divisor,
+            activation=activation,
+            semodule=semodule,
+            semodule_reduction=semodule_reduction,
+            semodule_divisor=semodule_divisor)
+
+        layers.append(
+            make_efficientnetv2_layer(stride=stride, **params))
+        layers.extend(
+            make_efficientnetv2_layer(stride=1, **params)
+            for _ in range(repeats - 1))
 
     return layers
 
 
-def make_mobilenetv2_layers(width):
-    settings = [
-        # kernel, channels, stride, expansion,
-        # se-module, se-reduction,se-divisor,
-        # activation, repeats
-        [3, 16, 1, 1, False, 0, 0, nn.ReLU6, 1],
-        [3, 24, 2, 6, False, 0, 0, nn.ReLU6, 2],
-        [3, 32, 2, 6, False, 0, 0, nn.ReLU6, 3],
-        [3, 64, 2, 6, False, 0, 0, nn.ReLU6, 4],
-        [3, 96, 1, 6, False, 0, 0, nn.ReLU6, 3],
-        [3, 160, 2, 6, False, 0, 0, nn.ReLU6, 3],
-        [3, 320, 1, 6, False, 0, 0, nn.ReLU6, 1]]
+def make_efficientnet_layers(
+    width: float,
+    depth: float,
+    divisor: int
+) -> List[Tuple[int, int, Dict[str, Any]]]:
+    bases: List[Tuple[str, int, int, int, int, Any, int, bool, int, int]] = [
+        # style, kernel, channels, stride, expansion, activation, repeats
+        # semodule, semodule_reduction, semodule_divisor
+        ('depthwise', 3, 16, 1, 1, nn.SiLU, 1, True, 4, 1),
+        ('inverted', 3, 24, 2, 6, nn.SiLU, 2, True, 24, 1),
+        ('inverted', 5, 40, 2, 6, nn.SiLU, 2, True, 24, 1),
+        ('inverted', 3, 80, 2, 6, nn.SiLU, 3, True, 24, 1),
+        ('inverted', 5, 112, 1, 6, nn.SiLU, 3, True, 24, 1),
+        ('inverted', 5, 192, 2, 6, nn.SiLU, 4, True, 24, 1),
+        ('inverted', 3, 320, 1, 6, nn.SiLU, 1, True, 24, 1),
+    ]
+    settings = []
 
-    return make_mobilenet_layers(settings, width, 1.0, 8)
+    for (style, kernel, channels, stride, expansion, activation, repeats,
+         semodule, semodule_reduction, semodule_divisor) in bases:
+        repeats = math.ceil(repeats * depth)
+        channels = int(channels * width)
+        settings.append((
+            style, kernel, channels, stride, expansion, activation, repeats,
+            semodule, semodule_reduction, semodule_divisor))
 
-
-def make_mobilenetv3_large_layers(width):
-    settings = [
-        # kernel, channels, stride, expansion,
-        # se-module, se-reduction,se-divisor,
-        # activation, repeats
-        [3, 16, 1, 1, False, 0, 0, nn.ReLU, 1],
-        [3, 24, 2, 4, False, 0, 0, nn.ReLU, 1],
-        [3, 24, 1, 3, False, 0, 0, nn.ReLU, 1],
-        [5, 40, 2, 3, True, 4, 8, nn.ReLU, 3],
-        [3, 80, 2, 6, False, 0, 0, nn.Hardswish, 1],
-        [3, 80, 1, 2.5, False, 0, 0, nn.Hardswish, 1],
-        [3, 80, 1, 2.3, False, 0, 0, nn.Hardswish, 2],
-        [3, 112, 1, 6, True, 4, 8, nn.Hardswish, 2],
-        [5, 160, 2, 6, True, 4, 8, nn.Hardswish, 3]]
-
-    return make_mobilenet_layers(settings, width, 1.0, 8)
+    return make_efficientnetv2_layers(settings, divisor=divisor)
 
 
-def make_efficientnet_layers(width, depth):
-    settings = [
-        # kernel, channels, stride, expansion,
-        # se-module, se-reduction,se-divisor,
-        # activation, repeats
-        [3, 16, 1, 1, True, 4, 1, nn.SiLU, 1],
-        [3, 24, 2, 6, True, 24, 1, nn.SiLU, 2],
-        [5, 40, 2, 6, True, 24, 1, nn.SiLU, 2],
-        [3, 80, 2, 6, True, 24, 1, nn.SiLU, 3],
-        [5, 112, 1, 6, True, 24, 1, nn.SiLU, 3],
-        [5, 192, 2, 6, True, 24, 1, nn.SiLU, 4],
-        [3, 320, 1, 6, True, 24, 1, nn.SiLU, 1]]
+def make_efficientnetv2_s_layers(
+    divisor: int
+) -> List[Tuple[int, int, Dict[str, Any]]]:
+    settings: List[Tuple[str, int, int, int, int, Any, int, bool, int, int]] = [
+        # style, kernel, channels, stride, expansion, activation, repeats
+        # semodule, semodule_reduction, semodule_divisor
+        ('conv', 3, 24, 1, 1, nn.SiLU, 2, False, 0, 0),
+        ('edge', 3, 48, 2, 4, nn.SiLU, 4, False, 0, 0),
+        ('edge', 3, 64, 2, 4, nn.SiLU, 4, False, 0, 0),
+        ('inverted', 3, 128, 2, 4, nn.SiLU, 6, True, 16, 1),
+        ('inverted', 3, 160, 1, 6, nn.SiLU, 9, True, 24, 1),
+        ('inverted', 3, 256, 2, 6, nn.SiLU, 15, True, 24, 1),
+    ]
 
-    return make_mobilenet_layers(settings, width, depth, 8)
+    return make_efficientnetv2_layers(settings, divisor=divisor)
+
+
+def make_efficientnetv2_m_layers(
+    divisor: int
+) -> List[Tuple[int, int, Dict[str, Any]]]:
+    settings: List[Tuple[str, int, int, int, int, Any, int, bool, int, int]] = [
+        # style, kernel, channels, stride, expansion, activation, repeats
+        # semodule, semodule_reduction, semodule_divisor
+        ('conv', 3, 24, 1, 1, nn.SiLU, 3, False, 0, 0),
+        ('edge', 3, 48, 2, 4, nn.SiLU, 5, False, 0, 0),
+        ('edge', 3, 80, 2, 4, nn.SiLU, 5, False, 0, 0),
+        ('inverted', 3, 160, 2, 4, nn.SiLU, 7, True, 16, 1),
+        ('inverted', 3, 176, 1, 6, nn.SiLU, 14, True, 24, 1),
+        ('inverted', 3, 304, 2, 6, nn.SiLU, 18, True, 24, 1),
+        ('inverted', 3, 512, 1, 6, nn.SiLU, 5, True, 24, 1),
+    ]
+
+    return make_efficientnetv2_layers(settings, divisor=divisor)
+
+
+def make_efficientnetv2_l_layers(
+    divisor: int
+) -> List[Tuple[int, int, Dict[str, Any]]]:
+    settings: List[Tuple[str, int, int, int, int, Any, int, bool, int, int]] = [
+        # style, kernel, channels, stride, expansion, activation, repeats
+        # se-module, se-reduction,se-divisor
+        ('conv', 3, 32, 1, 1, nn.SiLU, 4, False, 0, 0),
+        ('edge', 3, 64, 2, 4, nn.SiLU, 7, False, 0, 0),
+        ('edge', 3, 96, 2, 4, nn.SiLU, 7, False, 0, 0),
+        ('inverted', 3, 192, 2, 4, nn.SiLU, 10, True, 16, 8),
+        ('inverted', 3, 224, 1, 6, nn.SiLU, 19, True, 24, 8),
+        ('inverted', 3, 384, 2, 6, nn.SiLU, 25, True, 24, 8),
+        ('inverted', 3, 640, 1, 6, nn.SiLU, 7, True, 24, 8),
+    ]
+
+    return make_efficientnetv2_layers(settings, divisor=divisor)
 
 
 imagenet_params = dict(
-    stem=MobileNetStem,
+    stem=EfficientNetStem,
     block=MobileNetBlock,
-    operation=MobileNetOperation,
+    operation=EfficientNetOperation,
     downsample=NoneDownsample,
     junction=AddJunction,
+    head=MobileNetV2Head,
     classifier=LinearClassifier,
+    normalization=functools.partial(
+        nn.BatchNorm2d, eps=1e-3, momentum=0.9),
+    activation=nn.SiLU,
+    semodule_activation=nn.SiLU,
+    gate_normalization=functools.partial(
+        nn.BatchNorm2d, eps=1e-3, momentum=0.9),
+    gate_activation=nn.SiLU,
 )
 
 
 imagenet_models = {
-    'MobileNetV2-1.0': clone_params(
-        imagenet_params,
-        layers=make_mobilenetv2_layers(1.0),
-        stem_channels=32, head_channels=1280,
-        head=MobileNetV2Head,
-        activation=nn.ReLU6,
-        semodule_activation=nn.ReLU,
-        timm_name='mobilenetv2_100',
-        timm_loader=load_mobilenetv2_parameters),
-
-    'MobileNetV2-1.4': clone_params(
-        imagenet_params,
-        layers=make_mobilenetv2_layers(1.4),
-        stem_channels=48, head_channels=1792,
-        head=MobileNetV2Head,
-        activation=nn.ReLU6,
-        semodule_activation=nn.ReLU,
-        timm_name='mobilenetv2_140',
-        timm_loader=load_mobilenetv2_parameters),
-
-    'MobileNetV3-large': clone_params(
-        imagenet_params,
-        layers=make_mobilenetv3_large_layers(1.0),
-        stem_channels=16, head_channels=1280,
-        head=MobileNetV3Head,
-        activation=nn.Hardswish,
-        semodule_activation=nn.ReLU,
-        semodule_sigmoid=lambda: nn.Hardsigmoid(inplace=True),
-        timm_name='mobilenetv3_large_100',
-        timm_loader=load_mobilenetv3_parameters),
-
     'EfficientNet-B0': clone_params(
         imagenet_params,
-        layers=make_efficientnet_layers(1.0, 1.0),
+        layers=make_efficientnet_layers(1.0, 1.0, divisor=8),
         stem_channels=32, head_channels=1280,
-        head=MobileNetV2Head,
-        activation=nn.SiLU,
-        semodule_activation=nn.SiLU,
-        timm_name='efficientnet_b0',
+        timm_name='tf_efficientnet_b0',
         timm_loader=load_efficientnet_parameters),
 
     'EfficientNet-B1': clone_params(
         imagenet_params,
-        layers=make_efficientnet_layers(1.0, 1.1),
+        layers=make_efficientnet_layers(1.0, 1.1, divisor=8),
         stem_channels=32, head_channels=1280,
-        head=MobileNetV2Head,
-        activation=nn.SiLU,
-        semodule_activation=nn.SiLU,
-        timm_name='efficientnet_b1',
+        timm_name='tf_efficientnet_b1',
         timm_loader=load_efficientnet_parameters),
 
     'EfficientNet-B2': clone_params(
         imagenet_params,
-        layers=make_efficientnet_layers(1.1, 1.2),
+        layers=make_efficientnet_layers(1.1, 1.2, divisor=8),
         stem_channels=32, head_channels=1408,
-        head=MobileNetV2Head,
-        activation=nn.SiLU,
-        semodule_activation=nn.SiLU,
-        timm_name='efficientnet_b2',
+        timm_name='tf_efficientnet_b2',
         timm_loader=load_efficientnet_parameters),
 
     'EfficientNet-B3': clone_params(
         imagenet_params,
-        layers=make_efficientnet_layers(1.2, 1.4),
+        layers=make_efficientnet_layers(1.2, 1.4, divisor=8),
         stem_channels=40, head_channels=1536,
-        head=MobileNetV2Head,
-        activation=nn.SiLU,
-        semodule_activation=nn.SiLU,
-        timm_name='efficientnet_b3',
+        timm_name='tf_efficientnet_b3',
+        timm_loader=load_efficientnet_parameters),
+
+    'EfficientNetV2-S': clone_params(
+        imagenet_params,
+        layers=make_efficientnetv2_s_layers(divisor=8),
+        stem_channels=24, head_channels=1280,
+        timm_name='tf_efficientnetv2_s',
+        timm_loader=load_efficientnet_parameters),
+
+    'EfficientNetV2-M': clone_params(
+        imagenet_params,
+        layers=make_efficientnetv2_m_layers(divisor=8),
+        stem_channels=24, head_channels=1280,
+        timm_name='tf_efficientnetv2_m',
+        timm_loader=load_efficientnet_parameters),
+
+    'EfficientNetV2-L': clone_params(
+        imagenet_params,
+        layers=make_efficientnetv2_l_layers(divisor=8),
+        stem_channels=32, head_channels=1280,
+        timm_name='tf_efficientnetv2_l',
         timm_loader=load_efficientnet_parameters),
 }

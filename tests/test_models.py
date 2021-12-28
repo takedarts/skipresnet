@@ -28,10 +28,10 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('MobileNetV2-1.4', 'mobilenetv2_140', 224),
 
     # EfficientNets
-    ('EfficientNet-B0', 'efficientnet_b0', 224),
-    ('EfficientNet-B1', 'efficientnet_b1', 224),
-    ('EfficientNet-B2', 'efficientnet_b2', 224),
-    ('EfficientNet-B3', 'efficientnet_b3', 224),
+    ('EfficientNet-B0', 'tf_efficientnet_b0', 224),
+    ('EfficientNet-B1', 'tf_efficientnet_b1', 224),
+    ('EfficientNet-B2', 'tf_efficientnet_b2', 224),
+    ('EfficientNet-B3', 'tf_efficientnet_b3', 224),
 
     # EfficientNetV2s
     ('EfficientNetV2-S', 'tf_efficientnetv2_s', 224),

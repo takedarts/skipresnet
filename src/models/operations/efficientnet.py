@@ -6,7 +6,7 @@ import torch.nn as nn
 from ..modules import Conv2dSame, DropBlock, SEModule
 
 
-def _create_conv_residual(
+def _create_conv(
     in_channels: int,
     out_channels: int,
     kernel: int,
@@ -26,7 +26,7 @@ def _create_conv_residual(
     ] if m is not None)
 
 
-def _create_edge_residual(
+def _create_edge(
     in_channels: int,
     out_channels: int,
     kernel: int,
@@ -66,7 +66,7 @@ def _create_edge_residual(
     ] if m is not None)
 
 
-def _create_inverted_residual(
+def _create_inverted(
     in_channels: int,
     out_channels: int,
     kernel: int,
@@ -112,7 +112,47 @@ def _create_inverted_residual(
     ] if m is not None)
 
 
-class EfficientNetV2Operation(nn.Sequential):
+def _create_depthwise(
+    in_channels: int,
+    out_channels: int,
+    kernel: int,
+    stride: int,
+    expansion: Union[int, float],
+    normalization: Callable[..., nn.Module],
+    activation: Callable[..., nn.Module],
+    dropblock: bool,
+    semodule: bool,
+    semodule_reduction: int,
+    semodule_divisor: int,
+    semodule_activation: Callable[..., nn.Module],
+    semodule_sigmoid: Callable[..., nn.Module],
+    **kwargs,
+) -> collections.OrderedDict:
+    channels = round(in_channels * expansion)
+
+    return collections.OrderedDict((n, m) for n, m in [
+        ('conv1', Conv2dSame(
+            in_channels, channels, kernel_size=kernel, groups=in_channels,
+            stride=stride, bias=False, image_size=256)),
+        ('norm1', normalization(channels)),
+        ('drop1', None if not dropblock else DropBlock()),
+        ('act1', activation(inplace=True)),
+        ('semodule', None if not semodule else SEModule(
+            channels,
+            reduction=semodule_reduction,
+            divisor=semodule_divisor,
+            activation=semodule_activation,
+            sigmoid=semodule_sigmoid,
+            round_or_ceil='ceil')),
+        ('conv2', nn.Conv2d(
+            channels, out_channels, kernel_size=1,
+            padding=0, stride=1, bias=False)),
+        ('norm2', normalization(out_channels)),
+        ('drop2', None if not dropblock else DropBlock()),
+    ] if m is not None)
+
+
+class EfficientNetOperation(nn.Sequential):
     def __init__(
         self,
         in_channels: int,
@@ -124,10 +164,14 @@ class EfficientNetV2Operation(nn.Sequential):
 
         create_fn: Callable[..., collections.OrderedDict]
         if style == 'conv':
-            create_fn = _create_conv_residual
+            create_fn = _create_conv
         elif style == 'edge':
-            create_fn = _create_edge_residual
+            create_fn = _create_edge
+        elif style == 'inverted':
+            create_fn = _create_inverted
+        elif style == 'depthwise':
+            create_fn = _create_depthwise
         else:
-            create_fn = _create_inverted_residual
+            raise Exception(f'Unknown operation: {style}')
 
         super().__init__(create_fn(in_channels, out_channels, **kwargs))
