@@ -404,12 +404,12 @@ class NeptuneLogger(pll.NeptuneLogger):
         kwargs['project'] = f'{user_name}/{project_name[0]}'
         kwargs['name'] = project_name[-1]
 
-        if (save_path / 'neptune.json').is_file():
-            with open(save_path / 'neptune.json', 'r') as reader:
-                kwargs['run'] = json.load(reader)['id']
-
         super().__init__(**kwargs)
         self._save_path = save_path
+
+        if (save_path / 'neptune.json').is_file():
+            with open(save_path / 'neptune.json', 'r') as reader:
+                self._run_short_id = json.load(reader)['id']
 
     def _load_config(self):
         config_path = pathlib.Path(os.environ['HOME']) / '.neptune.json'
