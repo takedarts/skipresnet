@@ -167,12 +167,10 @@ imagenet_params = dict(
     junction=AddJunction,
     head=MobileNetV2Head,
     classifier=LinearClassifier,
-    normalization=functools.partial(
-        nn.BatchNorm2d, eps=1e-3, momentum=0.9),
+    normalization=functools.partial(nn.BatchNorm2d, eps=1e-3),
     activation=nn.SiLU,
     semodule_activation=nn.SiLU,
-    gate_normalization=functools.partial(
-        nn.BatchNorm2d, eps=1e-3, momentum=0.9),
+    gate_normalization=functools.partial(nn.BatchNorm2d, eps=1e-3),
     gate_activation=nn.SiLU,
 )
 
