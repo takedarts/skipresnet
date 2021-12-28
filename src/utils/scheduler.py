@@ -58,7 +58,9 @@ class ExponentialLR(_LRScheduler):
         last_epoch: int = -1
     ) -> None:
         if eta_min == 0.0:
-            eta_min = 0.01
+            rate = 0.01
+        else:
+            rate = eta_min / optimizer.param_groups[0]['lr']
 
         self.T_max = T_max
         self.T_wup = T_wup
@@ -68,7 +70,7 @@ class ExponentialLR(_LRScheduler):
         for _ in range(20):
             gmid = (ghigh + glow) * 0.5
 
-            if gmid ** T_max > eta_min:
+            if gmid ** T_max > rate:
                 ghigh = gmid
             else:
                 glow = gmid
