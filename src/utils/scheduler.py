@@ -9,12 +9,13 @@ def create_scheduler(
     train_schedule: str,
     train_epoch: int,
     train_warmup: int,
+    train_lastlr: float,
     **kwargs,
 ) -> _LRScheduler:
     if train_schedule == 'cosine':
-        return CosineAnnealingLR(optimizer, train_epoch, train_warmup)
+        return CosineAnnealingLR(optimizer, train_epoch, train_warmup, train_lastlr)
     elif train_schedule == 'exponential':
-        return ExponentialLR(optimizer, train_epoch, train_warmup)
+        return ExponentialLR(optimizer, train_epoch, train_warmup, train_lastlr)
     else:
         raise Exception('unsupported scheduler: {}'.format(train_schedule))
 
@@ -25,7 +26,7 @@ class CosineAnnealingLR(_LRScheduler):
         optimizer: optim.Optimizer,
         T_max: int,
         T_wup: int,
-        eta_min: float = 0.0,
+        eta_min: float,
         last_epoch: int = -1
     ) -> None:
         self.T_max = T_max
@@ -53,9 +54,12 @@ class ExponentialLR(_LRScheduler):
         optimizer: optim.Optimizer,
         T_max: int,
         T_wup: int,
-        rate: float = 0.01,
+        eta_min: float,
         last_epoch: int = -1
     ) -> None:
+        if eta_min == 0.0:
+            eta_min = 0.01
+
         self.T_max = T_max
         self.T_wup = T_wup
 
@@ -64,7 +68,7 @@ class ExponentialLR(_LRScheduler):
         for _ in range(20):
             gmid = (ghigh + glow) * 0.5
 
-            if gmid ** T_max > rate:
+            if gmid ** T_max > eta_min:
                 ghigh = gmid
             else:
                 glow = gmid

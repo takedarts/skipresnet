@@ -12,6 +12,7 @@ train_alpha: 0.99
 train_wdecay: 0.0005
 train_bdecay: False
 train_schedule: cosine
+train_lastlr: 0.0
 valid_crop: 32
 cutmix_alpha: 1.0
 cutmix_prob: 1.0

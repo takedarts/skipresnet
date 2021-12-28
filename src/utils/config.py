@@ -13,6 +13,7 @@ PARAMETERS: List[Tuple[str, Any, str]] = [
     ('train_wdecay', 0.0001, 'Weight decay (L2 penalty).'),
     ('train_bdecay', False, 'Weight decay (L2 penalty) is adapted to bias parameters.'),
     ('train_schedule', 'cosine', 'Learning rate schedule (cosine/exponential).'),
+    ('train_lastlr', 0.0, 'Learning rate at last epoch (default is used if 0.0).'),
     ('valid_crop', 224, 'Input image size at validation.'),
     ('cutmix_alpha', 1.0, 'Distribution parameter Alpha of CutMix.'),
     ('cutmix_prob', 0.0, 'Probability of CutMix.'),
