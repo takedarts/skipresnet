@@ -53,7 +53,7 @@ class ExponentialLR(_LRScheduler):
         optimizer: optim.Optimizer,
         T_max: int,
         T_wup: int,
-        rate: float = 0.05,
+        rate: float = 0.01,
         last_epoch: int = -1
     ) -> None:
         self.T_max = T_max

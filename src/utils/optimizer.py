@@ -21,6 +21,8 @@ def create_optimizer(
     model: nn.Module,
     train_optim: str,
     train_lr: float,
+    train_momentum: float,
+    train_eps: float,
     train_wdecay: float,
     train_bdecay: bool,
     **kwargs,
@@ -55,12 +57,15 @@ def create_optimizer(
             {'params': decay_params, 'weight_decay': train_wdecay}]
 
     if train_optim == 'sgd':
-        return optim.SGD(parameters, lr=train_lr, momentum=0.9, nesterov=True)
+        return optim.SGD(
+            parameters, lr=train_lr, momentum=train_momentum, nesterov=True)
     elif train_optim == 'rmsprop':
-        return optim.RMSprop(parameters, lr=train_lr, alpha=0.99, momentum=0.9)
+        return optim.RMSprop(
+            parameters, lr=train_lr, momentum=train_momentum, eps=train_eps)
     elif train_optim == 'adamw':
-        return optim.AdamW(parameters, lr=train_lr)
+        return optim.AdamW(parameters, lr=train_lr, eps=train_eps)
     elif train_optim == 'sam':
-        return SAM(parameters, lr=train_lr, momentum=0.9, nesterov=True)
+        return SAM(
+            parameters, lr=train_lr, momentum=train_momentum, nesterov=True)
     else:
         raise Exception('unsupported optimizer: {}'.format(train_optim))

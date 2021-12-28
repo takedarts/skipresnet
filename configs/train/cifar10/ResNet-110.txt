@@ -6,6 +6,8 @@ train_epoch: 600
 train_warmup: 5
 train_optim: sgd
 train_lr: 0.2
+train_momentum: 0.9
+train_eps: 1e-8
 train_wdecay: 0.0005
 train_bdecay: False
 train_schedule: cosine
@@ -20,6 +22,8 @@ randaugment_num: 0
 randaugment_mag: 0
 autoaugment: False
 labelsmooth: 0.0
+gradclip_value: 0.0
+gradclip_norm: 0.0
 dropout_prob: 0.0
 shakedrop_prob: 0.0
 dropblock_prob: 0.0
