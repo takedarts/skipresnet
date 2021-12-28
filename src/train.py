@@ -406,7 +406,7 @@ class NeptuneLogger(pll.NeptuneLogger):
 
         if (save_path / 'neptune.json').is_file():
             with open(save_path / 'neptune.json', 'r') as reader:
-                kwargs['experiment_id'] = json.load(reader)['id']
+                kwargs['run'] = json.load(reader)['id']
 
         super().__init__(**kwargs)
         self._save_path = save_path
