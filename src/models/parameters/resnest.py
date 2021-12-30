@@ -64,6 +64,24 @@ imagenet_models = {
         operation=SplitAttentionOperation, avg_first=True,
         timm_name='resnest50d_4s2x40d',
         timm_loader=load_resnest_parameters),
+
+    'ResNeSt-101-2s1x64d': clone_params(
+        imagenet_params,
+        layers=make_resnest_layers([3, 4, 23, 3], 64, 2, 1, 256 / 64),
+        stem_channels=128, head_channels=2048,
+        stem=DeepLargeStem, downsample=AverageLinearDownsample,
+        operation=SplitAttentionOperation, avg_first=False,
+        timm_name='resnest101e',
+        timm_loader=load_resnest_parameters),
+
+    'ResNeSt-200-2s1x64d': clone_params(
+        imagenet_params,
+        layers=make_resnest_layers([3, 24, 36, 3], 64, 2, 1, 256 / 64),
+        stem_channels=128, head_channels=2048,
+        stem=DeepLargeStem, downsample=AverageLinearDownsample,
+        operation=SplitAttentionOperation, avg_first=False,
+        timm_name='resnest200e',
+        timm_loader=load_resnest_parameters),
 }
 
 cifar_params = dict(

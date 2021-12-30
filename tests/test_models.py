@@ -21,6 +21,8 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('ResNeSt-50-2s1x64d', 'resnest50d', 224),
     ('ResNeSt-50-1s4x24d', 'resnest50d_1s4x24d', 224),
     ('ResNeSt-50-4s2x40d', 'resnest50d_4s2x40d', 224),
+    ('ResNeSt-101-2s1x64d', 'resnest101e', 224),
+    ('ResNeSt-200-2s1x64d', 'resnest200e', 224),
 
     # MobileNets
     ('MobileNetV3-large', 'mobilenetv3_large_100', 224),
