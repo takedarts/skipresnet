@@ -5,7 +5,7 @@ PARAMETERS: List[Tuple[str, Any, str]] = [
     ('train_crop', 224, 'Input image size.'),
     ('train_epoch', 300, 'Number of epochs.'),
     ('train_warmup', 5, 'Number of epochs for warmup.'),
-    ('train_optim', 'sgd', 'Optimizer name (sgd/rmsprop/adamw/sam).'),
+    ('train_optim', 'sgd', 'Optimizer name (sgd/adamw/rmsprop/rmsproptf/sam).'),
     ('train_lr', 0.025, 'Initial learning rate.'),
     ('train_momentum', 0.9, 'Momentum factor of optimizer.'),
     ('train_eps', 1e-08, 'Machine epsilon for optimizer stabilization.'),

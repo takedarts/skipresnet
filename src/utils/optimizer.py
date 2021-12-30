@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.modules.batchnorm
-from .optimizers import SAM
+from .optimizers import SAM, RMSpropTF
 
 NORM_CLASSES = (
     torch.nn.modules.batchnorm._BatchNorm,
@@ -60,12 +60,16 @@ def create_optimizer(
     if train_optim == 'sgd':
         return optim.SGD(
             parameters, lr=train_lr, momentum=train_momentum, nesterov=True)
-    elif train_optim == 'rmsprop':
-        return optim.RMSprop(
-            parameters, lr=train_lr,
-            alpha=train_alpha, momentum=train_momentum, eps=train_eps)
     elif train_optim == 'adamw':
         return optim.AdamW(parameters, lr=train_lr, eps=train_eps)
+    elif train_optim == 'rmsprop':
+        return optim.RMSprop(
+            parameters, lr=train_lr, alpha=train_alpha,
+            momentum=train_momentum, eps=train_eps)
+    elif train_optim == 'rmsproptf':
+        return RMSpropTF(
+            parameters, lr=train_lr, alpha=train_alpha,
+            momentum=train_momentum, eps=train_eps)
     elif train_optim == 'sam':
         return SAM(
             parameters, lr=train_lr, momentum=train_momentum, nesterov=True)
