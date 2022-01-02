@@ -1,117 +1,66 @@
-from typing import Any, Dict
+from typing import Any, Callable, Dict
+
+import torch.nn as nn
 
 from . import parameters
+from .downsamples import LinearDownsample, NoneDownsample
 from .junctions import (AddJunction, DenseJunction, DynamicJunction,
-                        MeanJunction, NoneJunction, SkipJunction,
-                        StaticJunction, SumJunction)
+                        MeanJunction, SkipJunction, StaticJunction,
+                        SumJunction)
 
 
-def clone_params(params, **kwargs):
+def clone_params(params: Dict[str, Any], **kwargs) -> Dict[str, Any]:
     new_params = params.copy()
     new_params.update(kwargs)
 
     return new_params
 
 
-def skip_models(models):
-    new_models = {}
-
-    for name, params in models.items():
-        new_params = params.copy()
-        new_params['semodule'] = False
-
-        if (new_params['junction'] == AddJunction
-                or new_params['junction'] == NoneJunction):
-            new_params['junction'] = SkipJunction
-        else:
-            continue
-
-        new_models[f'Skip-{name}'] = new_params
-
-    return new_models
-
-
-def dense_models(models):
+def _new_models(
+    prefix: str,
+    models: Dict[str, Any],
+    junction: Callable[..., nn.Module],
+) -> Dict[str, Any]:
     new_models = {}
 
     for name, params in models.items():
         new_params = params.copy()
 
         if new_params['junction'] == AddJunction:
-            new_params['junction'] = DenseJunction
+            new_params['junction'] = junction
+
+            if new_params['downsample'] == NoneDownsample:
+                new_params['downsample'] = LinearDownsample
         else:
             continue
 
-        new_models[f'Dense-{name}'] = new_params
+        new_models[f'{prefix}-{name}'] = new_params
 
     return new_models
 
 
-def dynamic_models(models):
-    new_models = {}
-
-    for name, params in models.items():
-        new_params = params.copy()
-        new_params['semodule'] = False
-
-        if new_params['junction'] == AddJunction:
-            new_params['junction'] = DynamicJunction
-        else:
-            continue
-
-        new_models[f'Dynamic-{name}'] = new_params
-
-    return new_models
+def skip_models(models: Dict[str, Any]) -> Dict[str, Any]:
+    return _new_models('Skip', models, SkipJunction)
 
 
-def static_models(models):
-    new_models = {}
-
-    for name, params in models.items():
-        new_params = params.copy()
-
-        if new_params['junction'] == AddJunction:
-            new_params['junction'] = StaticJunction
-        else:
-            continue
-
-        new_models[f'Static-{name}'] = new_params
-
-    return new_models
+def dense_models(models: Dict[str, Any]) -> Dict[str, Any]:
+    return _new_models('Dense', models, DenseJunction)
 
 
-def mean_models(models):
-    new_models = {}
-
-    for name, params in models.items():
-        new_params = params.copy()
-        new_params['semodule'] = False
-
-        if new_params['junction'] == AddJunction:
-            new_params['junction'] = MeanJunction
-        else:
-            continue
-
-        new_models[f'Mean-{name}'] = new_params
-
-    return new_models
+def dynamic_models(models: Dict[str, Any]) -> Dict[str, Any]:
+    return _new_models('Dynamic', models, DynamicJunction)
 
 
-def sum_models(models):
-    new_models = {}
+def static_models(models: Dict[str, Any]) -> Dict[str, Any]:
+    return _new_models('Static', models, StaticJunction)
 
-    for name, params in models.items():
-        new_params = params.copy()
-        new_params['semodule'] = False
 
-        if new_params['junction'] == AddJunction:
-            new_params['junction'] = SumJunction
-        else:
-            continue
+def mean_models(models: Dict[str, Any]) -> Dict[str, Any]:
+    return _new_models('Mean', models, MeanJunction)
 
-        new_models[f'Sum-{name}'] = new_params
 
-    return new_models
+def sum_models(models: Dict[str, Any]) -> Dict[str, Any]:
+    return _new_models('Sum', models, SumJunction)
 
 
 imagenet_base_models: Dict[str, Any] = {}
