@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ..functions import channelpad
 from ..modules import Reshape
 
 
@@ -63,7 +64,7 @@ class GateJunction(nn.Module):
 
     def forward(self, y: torch.Tensor, x: List[Any]) -> torch.Tensor:
         xs = [
-            F.pad(x[i], (0, 0, 0, 0, 0, p)) if p != 0 else x[i]
+            channelpad(x[i], p) if p != 0 else x[i]
             for i, p in zip(self.inbounds, self.paddings)]
         w = self.op(torch.cat([y] + xs, dim=1))
         w1, w2 = w.split([1, len(xs)], dim=1)

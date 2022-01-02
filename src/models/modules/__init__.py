@@ -1,9 +1,10 @@
 from .batchnorm import FrozenBatchNorm2d
 from .blurpool import BlurPool2d
+from .channelpad import ChannelPad
 from .conv2d_same import Conv2dSame
 from .dropblock import DropBlock
 from .multiply import Multiply
-from .reshape import ChannelPad, Reshape
+from .reshape import Reshape
 from .semodule import SEModule
 from .shakedrop import ShakeDrop
 from .sigmoid import HSigmoid

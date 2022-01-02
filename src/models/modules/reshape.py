@@ -1,9 +1,9 @@
+import torch
 import torch.nn as nn
 
 
 class Reshape(nn.Module):
-
-    def __init__(self, *shape):
+    def __init__(self, *shape) -> None:
         super().__init__()
 
         if len(shape) == 1 and hasattr(shape[0], '__getitem__'):
@@ -11,26 +11,8 @@ class Reshape(nn.Module):
         else:
             self.shape = tuple(shape)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return x.view(x.shape[0], *self.shape)
 
-    def extra_repr(self):
+    def extra_repr(self) -> str:
         return str(self.shape)
-
-
-class ChannelPad(nn.Module):
-
-    def __init__(self, size):
-        super().__init__()
-        self.size = size
-
-    def forward(self, x):
-        if self.size > 0:
-            return nn.functional.pad(x, (0, 0, 0, 0, 0, self.size))
-        elif self.size < 0:
-            return x[:, :self.size]
-        else:
-            return x
-
-    def extra_repr(self):
-        return str(self.size)
