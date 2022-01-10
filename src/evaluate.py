@@ -101,7 +101,7 @@ def main() -> None:
     loss, accuracy1, accuracy5 = evaluate(
         model, loader, device=device, progress_bar=not args.no_progress)
 
-    print(f'dataset = {config.dataset}')
+    print(f'dataset = {args.dataset}')
     print(f'model = {config.model}')
     print(f'loss = {loss:.6f}')
     print(f'accuracy1 = {accuracy1:.6f}')
