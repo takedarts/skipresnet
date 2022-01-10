@@ -57,11 +57,17 @@ Following models are trainied using the ImageNet-1k dataset from scratch. The im
 |ResNeXt-50-32x4d<br>Skip-ResNeXt-50-32x4d|25.03M<br>39.63M|4.292G<br>4.355G|[ResNeXt-50-32x4d.txt](configs/train/imagenet/ResNeXt-50-32x4d.txt)<br>[Skip-ResNeXt-50-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-50-32x4d.txt)|
 
 ### Results on the ImageNet-1k dataset
-|Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|
-|:---|:---:|:---:|:---:|:---:|
-|ResNet-34<sub>(1)</sub><br>Skip-ResNet-34<sub>(1)</sub>|0.7539<br>0.7675|0.7612<br>0.7759|0.7636<br>0.7773|0.7653<br>**0.7782**|
-|ResNet-50<sub>(1)</sub><br>Skip-ResNet-50<sub>(1)</sub>|0.7887<br>0.8029|0.7948<br>0.8103|0.7954<br>**0.8120**|0.7951<br>0.8095|
-|ResNeXt-50-32x4d<sub>(1)</sub><br>Skip-ResNeXt-50-32x4d<sub>(1)</sub>|0.7963<br>0.8067|0.8015<br>0.8125|0.8032<br>**0.8131**|0.8016<br>0.8110|
+|Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|top-1 acc.<br>(352x352)|top-1 acc.<br>(384x384)|
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+|ResNet-34<sub>(5)</sub><br>Skip-ResNet-34<sub>(5)</sub>|0.7553<br>0.7675|0.7622<br>0.7759|0.7654<br>0.7778|0.7665<br>**0.7782**|0.7627<br>0.7751|0.7586<br>0.7704|
+|ResNet-50<sub>(5)</sub><br>Skip-ResNet-50<sub>(5)</sub>|0.7901<br>0.8041|0.7953<br>0.8103|0.7964<br>**0.8120**|0.7954<br>0.8104|0.7926<br>0.8083|0.7885<br>0.8054|
+|ResNeXt-50-32x4d<sub>(1)</sub><br>Skip-ResNeXt-50-32x4d<sub>(1)</sub>|0.7963<br>0.8067|0.8015<br>0.8125|0.8032<br>**0.8131**|0.8016<br>0.8110|<br>|<br>|
+
+### Results on the ImageNet-A dataset
+|Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|top-1 acc.<br>(352x352)|top-1 acc.<br>(384x384)|
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|
+|ResNet-34<sub>(5)</sub><br>Skip-ResNet-34<sub>(5)</sub>|0.0143<br>0.0259|0.0204<br>0.0328|0.0297<br>0.0416|0.0321<br>0.0448|0.0364<br>**0.0453**|0.0408<br>0.0439|
+|ResNet-50<sub>(5)</sub><br>Skip-ResNet-50<sub>(5)</sub>|0.0304<br>0.0695|0.0477<br>0.0889|0.0583<br>0.0987|0.0625<br>0.1015|0.0607<br>**0.1024**|0.0621<br>0.1015|
 
 ## Performances of models trained on CIFAR-10/100
 Following models are trainied using the CIFAR-10/100 dataset from scratch. No extra images are used.
