@@ -64,18 +64,7 @@ class ExponentialLR(_LRScheduler):
 
         self.T_max = T_max
         self.T_wup = T_wup
-
-        ghigh, glow = 1.0, 0.0
-
-        for _ in range(20):
-            gmid = (ghigh + glow) * 0.5
-
-            if gmid ** T_max > rate:
-                ghigh = gmid
-            else:
-                glow = gmid
-
-        self.gamma = (ghigh + glow) * 0.5
+        self.gamma = rate ** (1 / T_max)
 
         super().__init__(optimizer, last_epoch)
 
