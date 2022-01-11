@@ -59,7 +59,7 @@ Following models are trainied using the ImageNet-1k dataset from scratch. The im
 ### Results on the ImageNet-1k dataset
 |Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|
 |:---|:---:|:---:|:---:|:---:|
-|ResNet-34<sub>(5)</sub><br>Skip-ResNet-34<sub>(5)</sub>|0.7553<br>0.7675|0.7622<br>0.7759|0.7654<br>0.7778|0.7665<br>**0.7782**|
+|ResNet-34<sub>(3)</sub><br>Skip-ResNet-34<sub>(3)</sub>|0.7553<br>0.7675|0.7622<br>0.7759|0.7654<br>0.7778|0.7665<br>**0.7782**|
 |ResNet-50<sub>(5)</sub><br>Skip-ResNet-50<sub>(5)</sub>|0.7901<br>0.8041|0.7953<br>0.8103|0.7964<br>**0.8120**|0.7954<br>0.8104|
 |ResNeXt-50-32x4d<sub>(1)</sub><br>Skip-ResNeXt-50-32x4d<sub>(1)</sub>|0.7963<br>0.8067|0.8015<br>0.8125|0.8032<br>**0.8131**|0.8016<br>0.8110|
 
