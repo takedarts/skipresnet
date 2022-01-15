@@ -48,8 +48,10 @@ def create_train_dataloader(
     pin_memory: bool,
     train_crop: int,
     autoaugment: bool,
+    randaugment_prob: float,
     randaugment_num: int,
     randaugment_mag: int,
+    randaugment_std: float,
     randomerasing_prob: float,
     randomerasing_type: str,
     mixup_prob: float,
@@ -70,8 +72,10 @@ def create_train_dataloader(
         crop_size=train_crop,
         stdaugment=True,
         autoaugment=autoaugment,
+        randaugment_prob=randaugment_prob,
         randaugment_num=randaugment_num,
         randaugment_mag=randaugment_mag,
+        randaugment_std=randaugment_std,
         randomerasing_prob=randomerasing_prob,
         randomerasing_type=randomerasing_type,
         cutmix_prob=cutmix_prob,
@@ -102,8 +106,10 @@ def create_valid_dataloader(
         crop_size=valid_crop,
         stdaugment=False,
         autoaugment=False,
+        randaugment_prob=0.0,
         randaugment_num=0,
         randaugment_mag=0,
+        randaugment_std=0.0,
         randomerasing_prob=0,
         randomerasing_type='',
         cutmix_prob=0.0,
@@ -124,8 +130,10 @@ def _create_dataloader(
     crop_size: int,
     stdaugment: bool,
     autoaugment: bool,
+    randaugment_prob: float,
     randaugment_num: int,
     randaugment_mag: int,
+    randaugment_std: float,
     randomerasing_prob: float,
     randomerasing_type: str,
     mixup_prob: float,
@@ -141,8 +149,10 @@ def _create_dataloader(
         train=train,
         stdaugment=stdaugment,
         autoaugment=autoaugment,
+        randaugment_prob=randaugment_prob,
         randaugment_num=randaugment_num,
         randaugment_mag=randaugment_mag,
+        randaugment_std=randaugment_std,
         randomerasing_prob=randomerasing_prob,
         randomerasing_type=randomerasing_type)
     length = dataset.length
@@ -181,8 +191,10 @@ def _create_dataset(
     crop_size: int,
     stdaugment: bool,
     autoaugment: bool,
+    randaugment_prob: float,
     randaugment_num: int,
     randaugment_mag: int,
+    randaugment_std: float,
     randomerasing_prob: float,
     randomerasing_type: str,
 ) -> Processor:
@@ -194,8 +206,10 @@ def _create_dataset(
             train=train,
             stdaugment=stdaugment,
             autoaugment=autoaugment,
+            randaugment_prob=randaugment_prob,
             randaugment_num=randaugment_num,
             randaugment_mag=randaugment_mag,
+            randaugment_std=randaugment_std,
             randomerasing_prob=randomerasing_prob,
             randomerasing_type=randomerasing_type)
     else:
@@ -209,8 +223,10 @@ def ImagenetDataset(
     crop_size: int,
     stdaugment: bool,
     autoaugment: bool,
+    randaugment_prob: float,
     randaugment_num: int,
     randaugment_mag: int,
+    randaugment_std: float,
     randomerasing_prob: float,
     randomerasing_type: str,
 ) -> Processor:
@@ -245,10 +261,12 @@ def ImagenetDataset(
     if autoaugment:
         transforms.insert(0, AutoAugmentImageNet())
 
-    if randaugment_num != 0 and randaugment_mag != 0:
-        transforms.insert(0, RandAugment(randaugment_num, randaugment_mag))
+    if randaugment_prob != 0.0:
+        transforms.insert(0, RandAugment(
+            randaugment_num, randaugment_mag,
+            randaugment_prob, randaugment_std))
 
-    if randomerasing_prob != 0:
+    if randomerasing_prob != 0.0:
         value = 0 if randomerasing_type == 'zero' else 'random'
         transforms.append(torchvision.transforms.RandomErasing(
             p=randomerasing_prob, value=value))

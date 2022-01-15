@@ -4,7 +4,7 @@ from typing import Any, List
 import torch
 import torchvision
 
-from .augmentations import AutoAugmentCIFAR10
+from .augmentations import AutoAugmentCIFAR10, RandAugment
 from .pytorch import apply_augmentations
 
 
@@ -30,8 +30,10 @@ def create_train_dataloader(
     pin_memory: bool,
     train_crop: int,
     autoaugment: bool,
+    randaugment_prob: float,
     randaugment_num: int,
     randaugment_mag: int,
+    randaugment_std: float,
     randomerasing_prob: float,
     randomerasing_type: str,
     mixup_prob: float,
@@ -52,8 +54,10 @@ def create_train_dataloader(
         pin_memory=pin_memory,
         stdaugment=True,
         autoaugment=autoaugment,
+        randaugment_prob=randaugment_prob,
         randaugment_num=randaugment_num,
         randaugment_mag=randaugment_mag,
+        randaugment_std=randaugment_std,
         randomerasing_prob=randomerasing_prob,
         randomerasing_type=randomerasing_type,
         cutmix_prob=cutmix_prob,
@@ -84,7 +88,10 @@ def create_valid_dataloader(
         crop_size=valid_crop,
         stdaugment=False,
         autoaugment=False,
-        randaugment_num=0, randaugment_mag=0,
+        randaugment_prob=0.0,
+        randaugment_num=0,
+        randaugment_mag=0,
+        randaugment_std=0.0,
         randomerasing_prob=0, randomerasing_type='',
         cutmix_prob=0.0, cutmix_alpha=0.0,
         mixup_prob=0.0, mixup_alpha=0.0,
@@ -102,8 +109,10 @@ def _create_dataloader(
     crop_size: int,
     stdaugment: bool,
     autoaugment: bool,
+    randaugment_prob: float,
     randaugment_num: int,
     randaugment_mag: int,
+    randaugment_std: float,
     randomerasing_prob: float,
     randomerasing_type: str,
     cutmix_prob: float,
@@ -119,8 +128,10 @@ def _create_dataloader(
         crop_size=crop_size,
         stdaugment=stdaugment,
         autoaugment=autoaugment,
+        randaugment_prob=randaugment_prob,
         randaugment_num=randaugment_num,
         randaugment_mag=randaugment_mag,
+        randaugment_std=randaugment_std,
         randomerasing_prob=randomerasing_prob,
         randomerasing_type=randomerasing_type)
 
@@ -146,20 +157,24 @@ def _create_dataset(
     crop_size: int,
     stdaugment: bool,
     autoaugment: bool,
+    randaugment_prob: float,
     randaugment_num: int,
     randaugment_mag: int,
+    randaugment_std: float,
     randomerasing_prob: float,
     randomerasing_type: str,
 ) -> torch.utils.data.Dataset:
     if dataset_name == 'cifar10':
         return Cifar10Dataset(
             data_path, train, crop_size, stdaugment, autoaugment,
-            randaugment_num, randaugment_mag,
+            randaugment_prob, randaugment_num,
+            randaugment_mag, randaugment_std,
             randomerasing_prob, randomerasing_type)
     elif dataset_name == 'cifar100':
         return Cifar100Dataset(
             data_path, train, crop_size, stdaugment, autoaugment,
-            randaugment_num, randaugment_mag,
+            randaugment_prob, randaugment_num,
+            randaugment_mag, randaugment_std,
             randomerasing_prob, randomerasing_type)
     else:
         raise Exception(f'Unsuppoted dataset: {dataset_name}')
@@ -175,8 +190,10 @@ class CifarDataset(torch.utils.data.Dataset):
         std: List[float],
         stdaugment: bool,
         autoaugment: bool,
+        randaugment_prob: float,
         randaugment_num: int,
         randaugment_mag: int,
+        randaugment_std: float,
         random_erasing_prob: float,
         random_erasing_type: str,
     ) -> None:
@@ -197,9 +214,10 @@ class CifarDataset(torch.utils.data.Dataset):
         if autoaugment:
             transforms.insert(0, AutoAugmentCIFAR10())
 
-        if randaugment_num != 0 and randaugment_mag != 0:
-            transforms.insert(0, torchvision.transforms.RandAugment(
-                randaugment_num, randaugment_mag))
+        if randaugment_prob != 0.0:
+            transforms.insert(0, RandAugment(
+                randaugment_num, randaugment_mag,
+                randaugment_prob, randaugment_std))
 
         if random_erasing_prob != 0:
             value = 0 if random_erasing_type == 'zero' else 'random'
@@ -233,8 +251,10 @@ class Cifar10Dataset(CifarDataset):
         crop_size: int,
         stdaugment: bool,
         autoaugment: bool,
+        randaugment_prob: float,
         randaugment_num: int,
         randaugment_mag: int,
+        randaugment_std: float,
         random_erasing_prob: float,
         random_erasing_type: str,
     ) -> None:
@@ -242,7 +262,8 @@ class Cifar10Dataset(CifarDataset):
             torchvision.datasets.CIFAR10(str(path), download=False, train=train),
             crop_size=crop_size, num_classes=10, mean=self.MEAN, std=self.STD,
             stdaugment=stdaugment, autoaugment=autoaugment,
-            randaugment_num=randaugment_num, randaugment_mag=randaugment_mag,
+            randaugment_prob=randaugment_prob, randaugment_num=randaugment_num,
+            randaugment_mag=randaugment_mag, randaugment_std=randaugment_std,
             random_erasing_prob=random_erasing_prob,
             random_erasing_type=random_erasing_type)
 
@@ -258,8 +279,10 @@ class Cifar100Dataset(CifarDataset):
         crop_size: int,
         stdaugment: bool,
         autoaugment: bool,
+        randaugment_prob: float,
         randaugment_num: int,
         randaugment_mag: int,
+        randaugment_std: float,
         random_erasing_prob: float,
         random_erasing_type: str,
     ) -> None:
@@ -267,6 +290,7 @@ class Cifar100Dataset(CifarDataset):
             torchvision.datasets.CIFAR100(path, download=False, train=train),
             crop_size=crop_size, num_classes=100, mean=self.MEAN, std=self.STD,
             stdaugment=stdaugment, autoaugment=autoaugment,
-            randaugment_num=randaugment_num, randaugment_mag=randaugment_mag,
+            randaugment_prob=randaugment_prob, randaugment_num=randaugment_num,
+            randaugment_mag=randaugment_mag, randaugment_std=randaugment_std,
             random_erasing_prob=random_erasing_prob,
             random_erasing_type=random_erasing_type)

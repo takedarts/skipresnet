@@ -20,8 +20,10 @@ mixup_alpha: 1.0
 mixup_prob: 0.0
 randomerasing_prob: 0.0
 randomerasing_type: random
+randaugment_prob: 0.0
 randaugment_num: 0
 randaugment_mag: 0
+randaugment_std: 0.0
 autoaugment: False
 labelsmooth: 0.0
 gradclip_value: 0.0
