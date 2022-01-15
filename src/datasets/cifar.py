@@ -2,10 +2,11 @@ import pathlib
 from typing import Any, List
 
 import torch
+import torch.utils.data
 import torchvision
 
-from .augmentations import AutoAugmentCIFAR10, RandAugment
-from .pytorch import apply_augmentations
+from .augmentations import (AutoAugmentCIFAR10, RandAugment,
+                            apply_cutmixup_to_dataset)
 
 
 def setup_dataloader(dataset_name: str, data_path: str) -> None:
@@ -135,7 +136,7 @@ def _create_dataloader(
         randomerasing_prob=randomerasing_prob,
         randomerasing_type=randomerasing_type)
 
-    dataset = apply_augmentations(
+    dataset = apply_cutmixup_to_dataset(
         dataset=dataset,
         mixup_prob=mixup_prob, mixup_alpha=mixup_alpha,
         cutmix_prob=cutmix_prob, cutmix_alpha=cutmix_alpha,

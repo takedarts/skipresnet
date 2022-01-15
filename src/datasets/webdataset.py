@@ -7,15 +7,12 @@ import time
 import urllib.parse
 from typing import Any, Dict, Generator, Iterable, Optional, Sequence, Tuple
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.utils.data
 
 import webdataset as wds
 import webdataset.gopen as wdsg
-
-from . import augmentations
 
 try:
     import torch_xla.core.xla_model as xm  # type:ignore
@@ -35,74 +32,6 @@ def apply_class_to_tensor(
         target = F.one_hot(
             torch.tensor(target), num_classes=num_classes).float()
         yield image, target
-
-
-def apply_augmentations(
-    dataset: Iterable[Tuple[torch.Tensor, torch.Tensor]],
-    mixup_prob: float,
-    mixup_alpha: float,
-    cutmix_prob: float,
-    cutmix_alpha: float,
-    labelsmooth: float,
-) -> Iterable[Tuple[torch.Tensor, torch.Tensor]]:
-    if ((mixup_prob > 0.0 and mixup_alpha > 0.0)
-            or (cutmix_prob > 0.0 and cutmix_alpha > 0.0)):
-        dataset = apply_mixup_cutmix(
-            dataset=dataset,
-            mixup_prob=mixup_prob, mixup_alpha=mixup_alpha,
-            cutmix_prob=cutmix_prob, cutmix_alpha=cutmix_alpha)
-
-    if labelsmooth > 0.0:
-        dataset = apply_labelsmooth(dataset=dataset, labelsmooth=labelsmooth)
-
-    return dataset
-
-
-@ torch.no_grad()
-def apply_mixup_cutmix(
-    dataset: Any,
-    mixup_prob: float,
-    mixup_alpha: float,
-    cutmix_prob: float,
-    cutmix_alpha: float,
-) -> Generator[Tuple[torch.Tensor, torch.Tensor], None, None]:
-    cutmix_prob /= max(1.0 - mixup_prob, 1e-6)
-    image1, target1 = None, None
-    image2, target2 = None, None
-
-    for values in dataset:
-        image1, target1 = image2, target2
-        image2, target2 = values
-
-        if image1 is None:
-            continue
-
-        if mixup_prob + cutmix_prob > 1.0:
-            mixup_prob /= mixup_prob + cutmix_prob
-            cutmix_prob /= mixup_prob + cutmix_prob
-
-        prob = np.random.rand()
-
-        if prob < mixup_prob:
-            yield augmentations.apply_mixup(
-                image1, target1, image2, target2, mixup_alpha)
-        elif prob < mixup_prob + cutmix_prob:
-            yield augmentations.apply_cutmix(
-                image1, target1, image2, target2, cutmix_alpha)
-        else:
-            yield image1, target1
-
-    if image2 is not None and target2 is not None:
-        yield image2, target2
-
-
-@torch.no_grad()
-def apply_labelsmooth(
-    dataset: Iterable[Tuple[torch.Tensor, torch.Tensor]],
-    labelsmooth: float,
-) -> Generator[Tuple[torch.Tensor, torch.Tensor], None, None]:
-    for image, target in dataset:
-        yield augmentations.apply_labelsmooth(image, target, labelsmooth)
 
 
 class PytorchShardList(wds.PytorchShardList):

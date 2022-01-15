@@ -16,9 +16,10 @@ import torchvision.datasets
 
 import webdataset as wds
 
-from .augmentations import AutoAugmentImageNet, Lighting, RandAugment
-from .webdataset import (Processor, PytorchShardList, apply_augmentations,
-                         apply_class_to_tensor, gopen, url_opener)
+from .augmentations import (AutoAugmentImageNet, Lighting, RandAugment,
+                            apply_cutmixup_to_stream)
+from .webdataset import (Processor, PytorchShardList, apply_class_to_tensor,
+                         gopen, url_opener)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -159,7 +160,7 @@ def _create_dataloader(
     sampler = dataset.sampler
 
     dataset = dataset.then(
-        apply_augmentations,
+        apply_cutmixup_to_stream,
         mixup_prob=mixup_prob, mixup_alpha=mixup_alpha,
         cutmix_prob=cutmix_prob, cutmix_alpha=cutmix_alpha,
         labelsmooth=labelsmooth)
