@@ -1,9 +1,15 @@
 from typing import List, Tuple
+
 import models
+import pytest
 import timm
 import torch
 import torch.nn as nn
-import pytest
+
+# ConvNeXt models are loaded.
+# This code will be removed when timm supoprts ConvNeXt.
+from models.reference import convnext
+convnext.load()
 
 
 pretrained_model_names: List[Tuple[str, str, int]] = [
@@ -66,6 +72,11 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('SwinTinyPatch4-224', 'swin_tiny_patch4_window7_224', 224),
     ('SwinSmallPatch4-224', 'swin_small_patch4_window7_224', 224),
     ('SwinBasePatch4-224', 'swin_base_patch4_window7_224', 224),
+
+    # ConvNeXt
+    ('ConvNeXt-T', 'convnext_tiny', 224),
+    ('ConvNeXt-S', 'convnext_small', 224),
+    ('ConvNeXt-B', 'convnext_base', 224),
 ]
 
 random_model_names = [

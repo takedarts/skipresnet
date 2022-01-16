@@ -1,3 +1,4 @@
+from .convnext import load_convnext_parameters
 from .densenet import load_densenet_parameters
 from .efficientnet import load_efficientnet_parameters
 from .mobilenet import load_mobilenetv2_parameters, load_mobilenetv3_parameters

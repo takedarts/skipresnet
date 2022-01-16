@@ -112,6 +112,12 @@ class Model(nn.Module):
         if self.timm_name is None:
             raise Exception('Name of a pretrained model is not set.')
 
+        # ConvNeXt models are loaded.
+        # This code will be removed when timm supoprts ConvNeXt.
+        if self.timm_name.startswith('convnext'):
+            from .reference import convnext
+            convnext.load()
+
         if self.timm_name not in timm.list_models(pretrained=True):
             raise Exception(f'Pretrained weights of `{self.timm_name}` is not found.')
 

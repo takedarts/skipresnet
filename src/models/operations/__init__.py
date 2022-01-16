@@ -1,3 +1,4 @@
+from .convnext import ConvNeXtOperation
 from .densenet import DenseNetOperation
 from .efficientnet import EfficientNetOperation
 from .mobilenet import MobileNetOperation

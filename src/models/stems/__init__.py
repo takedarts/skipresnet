@@ -1,4 +1,5 @@
 from .base import DeepLargeStem, LargeStem, SmallStem
+from .convnext import ConvNeXtStem
 from .efficientnet import EfficientNetStem
 from .mobilenet import MobileNetStem
 from .nfnet import NFNetStem
