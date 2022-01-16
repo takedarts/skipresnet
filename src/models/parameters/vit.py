@@ -9,6 +9,7 @@ from ..downsamples import LinearDownsample
 from ..heads import ViTHead
 from ..junctions import AddJunction
 from ..loaders import load_vit_parameters
+from ..modules import LayerNorm2d
 from ..operations import ViTOperation
 from ..stems import ViTPatchStem
 
@@ -43,7 +44,8 @@ imagenet_params = dict(
     classifier=LinearClassifierWithoutDropout,
     normalization=functools.partial(nn.LayerNorm, eps=1e-6),
     activation=lambda *args, **kwargs: nn.GELU(),
-    gate_normalization=lambda channels: nn.LayerNorm([channels, 1, 1], eps=1e-6),
+    gate_normalization=functools.partial(LayerNorm2d, eps=1e-5),
+    gate_activation=lambda *args, **kwargs: nn.GELU(),
 )
 
 imagenet_models = {

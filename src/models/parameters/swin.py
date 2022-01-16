@@ -9,6 +9,7 @@ from ..downsamples import NoneDownsample
 from ..heads import SwinHead
 from ..junctions import AddJunction
 from ..loaders import load_swin_parameters
+from ..modules import LayerNorm2d
 from ..operations import SwinOperation
 from ..stems import SwinPatchStem
 
@@ -65,7 +66,8 @@ imagenet_params = dict(
     classifier=LinearClassifier,
     normalization=functools.partial(nn.LayerNorm, eps=1e-5),
     activation=lambda *args, **kwargs: nn.GELU(),
-    gate_normalization=lambda channels: nn.LayerNorm([channels, 1, 1], eps=1e-5),
+    gate_normalization=functools.partial(LayerNorm2d, eps=1e-5),
+    gate_activation=lambda *args, **kwargs: nn.GELU(),
 )
 
 imagenet_models = {
