@@ -1,4 +1,7 @@
-import timm.data.auto_augment
+try:
+    import timm.data.auto_augment
+except BaseException:
+    timm = None
 
 
 class RandAugment(timm.data.auto_augment.RandAugment):
