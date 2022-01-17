@@ -13,5 +13,4 @@ from .signal_augmentation import SignalAugmentation
 from .split_attention import SplitAttentionModule
 from .stdconv import ScaledStdConv2d, ScaledStdConv2dSame
 from .stochastic_depth import StochasticDepth
-from .swin import PatchMerging
 from .swish import HSwish, Swish

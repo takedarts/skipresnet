@@ -35,4 +35,5 @@ class DenseNetBlock(_Block):
             junction=junction,
             preprocess=nn.Identity(),
             postprocess=nn.Identity(),
+            downsample_before_block=False,
             **kwargs)

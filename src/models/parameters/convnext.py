@@ -2,7 +2,7 @@ import functools
 
 import torch.nn as nn
 
-from ..blocks import PreDownsampleBlock
+from ..blocks import SwinBlock
 from ..classifiers import ConvNextClassifier
 from ..downsamples import ConvNeXtDownsample
 from ..heads import NoneHead
@@ -33,7 +33,7 @@ def make_convnext_layers(depths, channels):
 
 imagenet_params = dict(
     stem=ConvNeXtStem,
-    block=PreDownsampleBlock,
+    block=SwinBlock,
     operation=ConvNeXtOperation,
     downsample=ConvNeXtDownsample,
     junction=AddJunction,

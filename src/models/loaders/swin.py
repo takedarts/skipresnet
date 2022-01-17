@@ -18,9 +18,9 @@ def load_swin_parameters(model: Any, timm_model: Any) -> None:
             index += 2
 
         if layer.downsample is not None:
-            model.blocks[index + 0].preprocess.norm.load_state_dict(
+            model.blocks[index + 0].downsample.norm.load_state_dict(
                 layer.downsample.norm.state_dict())
-            model.blocks[index + 0].preprocess.reduction.load_state_dict(
+            model.blocks[index + 0].downsample.reduction.load_state_dict(
                 layer.downsample.reduction.state_dict())
 
     model.head.norm.load_state_dict(timm_model.norm.state_dict())

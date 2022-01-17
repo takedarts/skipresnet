@@ -6,7 +6,7 @@ import torch.nn as nn
 
 class ConvNeXtDownsample(nn.Sequential):
     '''
-    Downsample class with ConvNeXT.
+    Downsample class for ConvNeXT.
     https://arxiv.org/abs/2201.03545
     '''
 

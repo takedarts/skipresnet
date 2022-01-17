@@ -36,5 +36,5 @@ def _load_convnext_block_parameters(block: Any, timm_block: Any) -> None:
 
 
 def _load_convnext_downsample_parameters(block: Any, timm_down: Any) -> None:
-    block.preprocess.norm.load_state_dict(timm_down[0].state_dict())
-    block.preprocess.conv.load_state_dict(timm_down[1].state_dict())
+    block.downsample.norm.load_state_dict(timm_down[0].state_dict())
+    block.downsample.conv.load_state_dict(timm_down[1].state_dict())

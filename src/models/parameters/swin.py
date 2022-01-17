@@ -5,7 +5,7 @@ import torch.nn as nn
 
 from ..blocks import SwinBlock
 from ..classifiers import LinearClassifier
-from ..downsamples import NoneDownsample
+from ..downsamples import SwinDownsample
 from ..heads import SwinHead
 from ..junctions import AddJunction
 from ..loaders import load_swin_parameters
@@ -60,7 +60,7 @@ imagenet_params = dict(
     stem=SwinPatchStem,
     block=SwinBlock,
     operation=SwinOperation,
-    downsample=NoneDownsample,
+    downsample=SwinDownsample,
     junction=AddJunction,
     head=SwinHead,
     classifier=LinearClassifier,

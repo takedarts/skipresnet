@@ -4,3 +4,4 @@ from .convnext import ConvNeXtDownsample
 from .linear import LinearDownsample
 from .nfnet import NFDownsample
 from .none import NoneDownsample
+from .swin import SwinDownsample

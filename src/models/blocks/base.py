@@ -23,6 +23,7 @@ class _Block(nn.Module):
         shakedrop_prob: float,
         stochdepth_prob: float,
         signalaugment: float,
+        downsample_before_block: bool,
         **kwargs
     ) -> None:
         super().__init__()
@@ -37,11 +38,19 @@ class _Block(nn.Module):
             normalization=normalization, activation=activation,
             dropblock=dropblock, **kwargs)
 
-        # convolution layers
-        self.operation = operation(
-            in_channels, out_channels, stride=stride,
-            normalization=normalization, activation=activation,
-            dropblock=dropblock, **kwargs)
+        # layers
+        self.downsample_before_block = downsample_before_block
+
+        if downsample_before_block:
+            self.operation = operation(
+                out_channels, out_channels, stride=1,
+                normalization=normalization, activation=activation,
+                dropblock=dropblock, **kwargs)
+        else:
+            self.operation = operation(
+                in_channels, out_channels, stride=stride,
+                normalization=normalization, activation=activation,
+                dropblock=dropblock, **kwargs)
 
         # noise
         self.noise = nn.Sequential(
@@ -67,9 +76,14 @@ class _Block(nn.Module):
         # preprocess
         x[-1] = self.preprocess(x[-1])
 
-        # operation
+        # downsample
         z = self.downsample(x[-1])
-        y = self.operation(x[-1])
+
+        # layers
+        if self.downsample_before_block:
+            y = self.operation(z)
+        else:
+            y = self.operation(x[-1])
 
         # noise
         y = self.noise(y)
@@ -105,4 +119,31 @@ class BasicBlock(_Block):
             junction=junction,
             preprocess=nn.Identity(),
             postprocess=nn.ReLU(inplace=True),
+            downsample_before_block=False,
+            **kwargs)
+
+
+class PreActivationBlock(_Block):
+    '''
+    Block class for pre-actiovation ResNets.
+    '''
+
+    def __init__(
+        self,
+        index: int,
+        settings: List[Tuple[int, int, int]],
+        operation: Callable[..., nn.Module],
+        downsample: Callable[..., nn.Module],
+        junction: Callable[..., nn.Module],
+        **kwargs,
+    ) -> None:
+        super().__init__(
+            index=index,
+            settings=settings,
+            operation=operation,
+            downsample=downsample,
+            junction=junction,
+            preprocess=nn.Identity(),
+            postprocess=nn.Identity(),
+            downsample_before_block=False,
             **kwargs)
