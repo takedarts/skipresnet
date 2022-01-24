@@ -21,4 +21,3 @@ class RandAugment(timm.data.auto_augment.RandAugment):
             for name in timm.data.auto_augment._RAND_TRANSFORMS]
 
         super().__init__(ops, num_layers)
-        self.count = 0
