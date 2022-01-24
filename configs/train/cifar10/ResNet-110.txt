@@ -34,3 +34,4 @@ dropblock_prob: 0.0
 dropblock_size: 7
 stochdepth_prob: 0.0
 signalaugment: 0.0
+pretrained: False
