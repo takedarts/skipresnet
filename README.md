@@ -3,7 +3,7 @@
 [<img alt="Architecture of DenseResNets" src="res/architecture.png" width="250px" align="right">](res/architecture.png)
 
 SkipResNet is a Skip connected Residual convolutional neural Network for image recognition tasks.
-Though an architecture of SkipResNets is a stack of Residual Blocks just like ResNets, each residual block has several inbounds from the previous blocks in same manner as DenseNets.
+Though an architecture of SkipResNets is a stack of Residual Blocks just like ResNets, each residual block has several inbounds from the previous blocks in the same manner as DenseNets.
 In order to improve the performance, a residual block in SkipResNets includes a Gate Module instead of element-wise additions in ResNets or concatenations in DenseNets.
 A Gate Module contains an attention mechanism which selects useful features dynamically.
 Experimental results indicate that an architecture of SkipResNets improves the performance in image classification tasks.
@@ -54,20 +54,27 @@ Following models are trainied using the ImageNet-1k dataset from scratch. The im
 |:---|:---:|:---:|:---|
 |ResNet-34<br>Skip-ResNet-34|21.80M<br>22.72M|3.681G<br>3.694G|[ResNet-34.txt](configs/train/imagenet/ResNet-34.txt)<br>[Skip-ResNet-34.txt](configs/train/imagenet/Skip-ResNet-34.txt)|
 |ResNet-50<br>Skip-ResNet-50|25.56M<br>40.15M|4.138G<br>4.201G|[ResNet-50.txt](configs/train/imagenet/ResNet-50.txt)<br>[Skip-ResNet-50.txt](configs/train/imagenet/Skip-ResNet-50.txt)|
+|ResNet-101<br>Skip-ResNet-101|44.55M<br>83.36M|7.874G<br>8.017G|[ResNet-101.txt](configs/train/imagenet/ResNet-101.txt)<br>[Skip-ResNet-101.txt](configs/train/imagenet/Skip-ResNet-101.txt)|
 |ResNeXt-50-32x4d<br>Skip-ResNeXt-50-32x4d|25.03M<br>39.63M|4.292G<br>4.355G|[ResNeXt-50-32x4d.txt](configs/train/imagenet/ResNeXt-50-32x4d.txt)<br>[Skip-ResNeXt-50-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-50-32x4d.txt)|
+|ResNeXt-101-32x4d<br>Skip-ResNeXt-101-32x4d|44.18M<br>82.99M|8.063G<br>8.205G|[ResNeXt-101-32x4d.txt](configs/train/imagenet/ResNeXt-101-32x4d.txt)<br>[Skip-ResNeXt-101-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-101-32x4d.txt)|
 
 ### Results on the ImageNet-1k dataset
 |Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|
 |:---|:---:|:---:|:---:|:---:|
 |ResNet-34<sub>(3)</sub><br>Skip-ResNet-34<sub>(3)</sub>|0.7553<br>0.7675|0.7622<br>0.7759|0.7654<br>0.7778|0.7665<br>**0.7782**|
 |ResNet-50<sub>(5)</sub><br>Skip-ResNet-50<sub>(5)</sub>|0.7901<br>0.8041|0.7953<br>0.8103|0.7964<br>**0.8120**|0.7954<br>0.8104|
-|ResNeXt-50-32x4d<sub>(1)</sub><br>Skip-ResNeXt-50-32x4d<sub>(1)</sub>|0.7963<br>0.8067|0.8015<br>0.8125|0.8032<br>**0.8131**|0.8016<br>0.8110|
+|ResNet-101<sub>(3)</sub><br>Skip-ResNet-101<sub>(3)</sub>|0.8036<br>0.8139|0.8100<br>0.8217|0.8095<br>**0.8234**|0.8086<br>0.8208|
+|ResNeXt-50-32x4d<sub>(3)</sub><br>Skip-ResNeXt-50-32x4d<sub>(3)</sub>|0.7973<br>0.8067|0.8015<br>0.8125|0.8030<br>**0.8131**|0.8011<br>0.8126|
+|ResNeXt-101-32x4d<sub>(3)</sub><br>Skip-ResNeXt-101-32x4d<sub>(3)</sub>|0.8066<br>0.8139|0.8102<br>0.8203|0.8112<br>**0.8216**|0.8101<br>0.8210|
 
 ### Results on the ImageNet-A dataset
 |Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|
 |:---|:---:|:---:|:---:|:---:|
-|ResNet-34<sub>(5)</sub><br>Skip-ResNet-34<sub>(5)</sub>|0.0143<br>0.0259|0.0204<br>0.0328|0.0297<br>0.0416|0.0321<br>**0.0448**|
+|ResNet-34<sub>(3)</sub><br>Skip-ResNet-34<sub>(3)</sub>|0.0143<br>0.0259|0.0204<br>0.0328|0.0297<br>0.0416|0.0321<br>**0.0448**|
 |ResNet-50<sub>(5)</sub><br>Skip-ResNet-50<sub>(5)</sub>|0.0304<br>0.0695|0.0477<br>0.0889|0.0583<br>0.0987|0.0625<br>**0.1015**|
+|ResNet-101<sub>(3)</sub><br>Skip-ResNet-101<sub>(3)</sub>|0.0635<br>0.1157|0.0869<br>0.1324|0.1015<br>**0.1481**|0.1023<br>0.1455|
+|ResNeXt-50-32x4d<sub>(3)</sub><br>Skip-ResNeXt-50-32x4d<sub>(3)</sub>|0.0537<br>0.0916|0.0743<br>0.1072|0.0844<br>**0.1179**|0.0843<br>0.1179|
+|ResNeXt-101-32x4d<sub>(3)</sub><br>Skip-ResNeXt-101-32x4d<sub>(3)</sub>|0.0889<br>0.1319|0.1155<br>0.1528|0.1261<br>**0.1628**|0.1288<br>0.1557|
 
 ## Performances of models trained on CIFAR-10/100
 Following models are trainied using the CIFAR-10/100 dataset from scratch. No extra images are used.
