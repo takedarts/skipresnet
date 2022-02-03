@@ -6,7 +6,8 @@ import math
 import warnings
 
 
-def trunc_normal_(
+@torch.no_grad()
+def _no_grad_trunc_normal_(
     tensor: torch.Tensor,
     mean: float = 0.0,
     std: float = 1.0,
@@ -82,27 +83,23 @@ class WindowAttention(nn.Module):
         self.softmax = nn.Softmax(dim=-1)
 
         # define a parameter table of relative position bias
-        relative_position_bias_table = torch.zeros(
-            (2 * window_size[0] - 1) * (2 * window_size[1] - 1), num_heads)  # 2*Wh-1 * 2*Ww-1, nH
-        trunc_normal_(relative_position_bias_table, std=.02)
+        self.relative_position_bias_table = nn.Parameter(torch.zeros(
+            (2 * window_size[0] - 1) * (2 * window_size[1] - 1), num_heads))  # 2*Wh-1 * 2*Ww-1, nH
+        _no_grad_trunc_normal_(self.relative_position_bias_table, std=.02)
 
         # get pair-wise relative position index for each token inside the window
-        coords_h = [i for i in range(window_size[0]) for _ in range(window_size[1])]
-        coords_w = [i for _ in range(window_size[0]) for i in range(window_size[1])]
-        coords_flatten = torch.Tensor([coords_h, coords_w]).long()
+        coords_h = torch.arange(self.window_size[0])
+        coords_w = torch.arange(self.window_size[1])
+        coords = torch.stack(torch.meshgrid([coords_h, coords_w]))  # 2, Wh, Ww
+        coords_flatten = torch.flatten(coords, 1)  # 2, Wh*Ww
         relative_coords = coords_flatten[:, :, None] - coords_flatten[:, None, :]  # 2, Wh*Ww, Wh*Ww
         relative_coords = relative_coords.permute(1, 2, 0).contiguous()  # Wh*Ww, Wh*Ww, 2
         relative_coords[:, :, 0] += self.window_size[0] - 1  # shift to start from 0
         relative_coords[:, :, 1] += self.window_size[1] - 1
         relative_coords[:, :, 0] *= 2 * self.window_size[1] - 1
-        relative_position_index = relative_coords.sum(-1).view(-1)  # Wh*Ww, Wh*Ww
-
-        # set a parameter of relative position bias
-        relative_position_bias = relative_position_bias_table[relative_position_index].view(
-            window_size[0] * window_size[1], window_size[0] * window_size[1], -1)  # Wh*Ww,Wh*Ww,nH
-        relative_position_bias = relative_position_bias.permute(2, 0, 1)  # nH, Wh*Ww, Wh*Ww
-        relative_position_bias = relative_position_bias.unsqueeze(0).contiguous()
-        self.relative_position_bias = nn.Parameter(relative_position_bias.detach())
+        relative_position_index = relative_coords.sum(-1)  # Wh*Ww, Wh*Ww
+        self.register_buffer(
+            'relative_position_index', relative_position_index, persistent=False)
 
     def forward(
         self,
@@ -121,7 +118,14 @@ class WindowAttention(nn.Module):
         q, k, v = qkv[0], qkv[1], qkv[2]
 
         attn = (q @ k.transpose(-2, -1)) * self.scale
-        attn = attn + self.relative_position_bias
+
+        relative_position_index = self.relative_position_index.view(-1)  # type:ignore
+        relative_position_bias = self.relative_position_bias_table[relative_position_index]
+        relative_position_bias = relative_position_bias.view(
+            self.window_size[0] * self.window_size[1],
+            self.window_size[0] * self.window_size[1], -1)  # Wh*Ww,Wh*Ww,nH
+        relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous()  # nH, Wh*Ww, Wh*Ww
+        attn = attn + relative_position_bias.unsqueeze(0)
 
         if mask is not None:
             attn = attn.reshape(-1, mask.shape[0], self.num_heads, x.shape[1], x.shape[1])
