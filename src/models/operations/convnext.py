@@ -25,20 +25,20 @@ class ConvNeXtOperation(nn.Module):
             out_channels, out_channels, kernel_size=7,
             padding=3, groups=out_channels)
         self.norm = normalization(out_channels)
-        self.pwconv1 = nn.Linear(out_channels, 4 * out_channels)  # pointwise conv
+        self.pwconv1 = nn.Conv2d(
+            out_channels, out_channels * 4, kernel_size=1)
         self.act = activation(inplace=True)
-        self.pwconv2 = nn.Linear(4 * out_channels, out_channels)
+        self.pwconv2 = nn.Conv2d(
+            4 * out_channels, out_channels, kernel_size=1)
         self.gamma = nn.Parameter(
             layer_scale_init_value * torch.ones((out_channels)), requires_grad=True)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.dwconv(x)
         x = self.norm(x)
-        x = x.permute(0, 2, 3, 1)
         x = self.pwconv1(x)
         x = self.act(x)
         x = self.pwconv2(x)
-        x = self.gamma * x
-        x = x.permute(0, 3, 1, 2)
+        x = self.gamma[:, None, None] * x
 
         return x

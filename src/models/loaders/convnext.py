@@ -2,34 +2,29 @@ from typing import Any
 
 
 def load_convnext_parameters(model: Any, timm_model: Any) -> None:
-    timm_stem = timm_model.downsample_layers[0]
-    timm_downsample_layers = timm_model.downsample_layers[1:]
-
-    model.stem.conv.load_state_dict(timm_stem[0].state_dict())
-    model.stem.norm.load_state_dict(timm_stem[1].state_dict())
+    model.stem.conv.load_state_dict(timm_model.stem[0].state_dict())
+    model.stem.norm.load_state_dict(timm_model.stem[1].state_dict())
 
     index = 0
 
-    for timm_block in timm_model.stages[0]:
-        _load_convnext_block_parameters(model.blocks[index], timm_block)
-        index += 1
+    for i, timm_stage in enumerate(timm_model.stages):
+        if i != 0:
+            _load_convnext_downsample_parameters(
+                model.blocks[index], timm_stage.downsample)
 
-    for timm_down, timm_stages in zip(timm_downsample_layers, timm_model.stages[1:]):
-        _load_convnext_downsample_parameters(model.blocks[index], timm_down)
-        for timm_block in timm_stages:
+        for timm_block in timm_stage.blocks:
             _load_convnext_block_parameters(model.blocks[index], timm_block)
             index += 1
 
-    model.classifier.norm.load_state_dict(timm_model.norm.state_dict())
-    model.classifier.conv.weight.data[:] = timm_model.head.weight[:, :, None, None].data
-    model.classifier.conv.bias.data[:] = timm_model.head.bias.data
+    model.classifier.norm.load_state_dict(timm_model.head.norm.state_dict())
+    _load_linear_to_conv2d_parameters(model.classifier.conv, timm_model.head.fc)
 
 
 def _load_convnext_block_parameters(block: Any, timm_block: Any) -> None:
-    block.operation.dwconv.load_state_dict(timm_block.dwconv.state_dict())
+    block.operation.dwconv.load_state_dict(timm_block.conv_dw.state_dict())
     block.operation.norm.load_state_dict(timm_block.norm.state_dict())
-    block.operation.pwconv1.load_state_dict(timm_block.pwconv1.state_dict())
-    block.operation.pwconv2.load_state_dict(timm_block.pwconv2.state_dict())
+    _load_linear_to_conv2d_parameters(block.operation.pwconv1, timm_block.mlp.fc1)
+    _load_linear_to_conv2d_parameters(block.operation.pwconv2, timm_block.mlp.fc2)
 
     if timm_block.gamma is not None:
         block.operation.gamma.data[:] = timm_block.gamma.data
@@ -38,3 +33,12 @@ def _load_convnext_block_parameters(block: Any, timm_block: Any) -> None:
 def _load_convnext_downsample_parameters(block: Any, timm_down: Any) -> None:
     block.downsample.norm.load_state_dict(timm_down[0].state_dict())
     block.downsample.conv.load_state_dict(timm_down[1].state_dict())
+
+
+def _load_linear_to_conv2d_parameters(conv2d: Any, linear: Any) -> None:
+    conv2d.weight.data[:] = linear.weight[:, :, None, None].data
+
+    if linear.bias is not None:
+        conv2d.bias.data[:] = linear.bias.data
+    else:
+        assert conv2d.bias is None

@@ -6,11 +6,6 @@ import timm
 import torch
 import torch.nn as nn
 
-# ConvNeXt models are loaded.
-# This code will be removed when timm supoprts ConvNeXt.
-from models.reference import convnext
-convnext.load()
-
 
 pretrained_model_names: List[Tuple[str, str, int]] = [
     # ResNets
@@ -120,6 +115,11 @@ def _test_model(
     timm_model: nn.Module,
     image_size: int,
 ) -> None:
+    model_size = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    timm_model_size = sum(p.numel() for p in timm_model.parameters() if p.requires_grad)
+
+    assert model_size == timm_model_size
+
     timm_model.eval()
     model.eval()
 
