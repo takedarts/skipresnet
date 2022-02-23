@@ -9,19 +9,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .modules import FrozenBatchNorm2d
 from .parameter import PARAMETERS
 
 try:
     import timm
 except BaseException:
     timm = None
-
-
-def _freeze_parameters(m: nn.Module):
-    for p in m.parameters():
-        p.requires_grad = False
-    FrozenBatchNorm2d.convert_frozen_batchnorm(m)
 
 
 class Model(nn.Module):
@@ -43,7 +36,8 @@ class Model(nn.Module):
 
         # make blocks
         channels = [stem_channels] + [c for c, _, _ in layers]
-        settings = [(ic, oc, s) for ic, oc, (_, s, _) in zip(channels[:-1], channels[1:], layers)]
+        strides = [s for _, s, _ in layers]
+        settings = [s for s in zip(channels[:-1], channels[1:], strides)]
         dropblocks = list(itertools.accumulate(s - 1 for _, s, _ in layers))
         dropblocks = [v >= dropblocks[-1] - 1 for v in dropblocks]
         blocks = []
@@ -51,7 +45,12 @@ class Model(nn.Module):
         for i, ((_, _, params), dropblock) in enumerate(zip(layers, dropblocks)):
             block_kwargs = kwargs.copy()
             block_kwargs.update(params)
-            blocks.append(block(i, settings, dropblock=dropblock, ** block_kwargs))
+            blocks.append(block(
+                index=i,
+                settings=settings,
+                dropblock=dropblock,
+                **block_kwargs,
+            ))
 
         # modules
         self.stem = stem(stem_channels, **kwargs)
@@ -66,12 +65,10 @@ class Model(nn.Module):
         if pretrained:
             self.load_pretrained_parameters()
 
-    def freeze_blocks(self) -> None:
-        _freeze_parameters(self.stem)
-        _freeze_parameters(self.blocks)
-        _freeze_parameters(self.head)
-
-    def get_features(self, x: torch.Tensor) -> Tuple[torch.Tensor, List[torch.Tensor]]:
+    def get_features(
+        self,
+        x: torch.Tensor,
+    ) -> List[torch.Tensor]:
         y: List[torch.Tensor] = [self.stem(x)]
         f: List[torch.Tensor] = []
 
@@ -79,11 +76,15 @@ class Model(nn.Module):
             y = block(y)
             f.append(y[-1])
 
-        z = self.head(y[-1])
+        return f
 
-        return z, f
+    def get_prediction(
+        self,
+        x: torch.Tensor,
+        aggregation: bool = True,
+    ) -> torch.Tensor:
+        x = self.head(x)
 
-    def get_prediction(self, x: torch.Tensor, aggregation: bool = True) -> torch.Tensor:
         if aggregation:
             x = F.adaptive_avg_pool2d(x, (1, 1))
             x = self.classifier(x)
@@ -93,8 +94,12 @@ class Model(nn.Module):
 
         return x
 
-    def forward(self, x: torch.Tensor, aggregation: bool = True) -> torch.Tensor:
-        x = self.get_features(x)[0]
+    def forward(
+        self,
+        x: torch.Tensor,
+        aggregation: bool = True,
+    ) -> torch.Tensor:
+        x = self.get_features(x)[-1]
         x = self.get_prediction(x, aggregation=aggregation)
 
         return x
@@ -107,13 +112,15 @@ class Model(nn.Module):
 
     def load_pretrained_parameters(self) -> None:
         if timm is None:
-            raise Exception('Module `timm` is required: try `pip install timm`')
+            raise Exception(
+                'Module `timm` is required: try `pip install timm`')
 
         if self.timm_name is None:
             raise Exception('Name of a pretrained model is not set.')
 
         if self.timm_name not in timm.list_models(pretrained=True):
-            raise Exception(f'Pretrained weights of `{self.timm_name}` is not found.')
+            raise Exception(
+                f'Pretrained weights of `{self.timm_name}` is not found.')
 
         model = timm.create_model(self.timm_name, pretrained=True)
         self.load_model_parameters(model)
@@ -164,11 +171,12 @@ def create_model_from_checkpoint(checkpoint: Dict[str, Any]) -> 'Model':
     model_name = checkpoint['config']['model']
     dataset_name = checkpoint['config']['dataset']
     parameters = checkpoint['config']['parameters']
+    parameters['pretrained'] = False
 
     state_dict = checkpoint['state_dict']
     state_dict = {k[6:]: v for k, v in state_dict.items() if k[:6] == 'model.'}
 
-    model = create_model(model_name, dataset_name, ** parameters)
+    model = create_model(model_name, dataset_name, **parameters)
     model.load_state_dict(state_dict)
 
     return model
