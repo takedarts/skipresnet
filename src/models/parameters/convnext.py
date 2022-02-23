@@ -67,6 +67,14 @@ imagenet_models = {
         layers=make_convnext_layers([3, 3, 27, 3], 128),
         stem_channels=128, head_channels=1024,
         patch_size=4, layer_scale_init_value=1e-6,
-        timm_name='convnext_base',
+        timm_name='convnext_base_384_in22ft1k',
+        timm_loader=load_convnext_parameters),
+
+    'ConvNeXt-L': clone_params(
+        imagenet_params,
+        layers=make_convnext_layers([3, 3, 27, 3], 192),
+        stem_channels=192, head_channels=1536,
+        patch_size=4, layer_scale_init_value=1e-6,
+        timm_name='convnext_large_384_in22ft1k',
         timm_loader=load_convnext_parameters),
 }

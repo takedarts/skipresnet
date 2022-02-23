@@ -37,9 +37,9 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('EfficientNet-B3', 'tf_efficientnet_b3', 224),
 
     # EfficientNetV2s
-    ('EfficientNetV2-S', 'tf_efficientnetv2_s', 224),
-    ('EfficientNetV2-M', 'tf_efficientnetv2_m', 224),
-    ('EfficientNetV2-L', 'tf_efficientnetv2_l', 224),
+    ('EfficientNetV2-S', 'tf_efficientnetv2_s_in21ft1k', 224),
+    ('EfficientNetV2-M', 'tf_efficientnetv2_m_in21ft1k', 224),
+    ('EfficientNetV2-L', 'tf_efficientnetv2_l_in21ft1k', 224),
 
     # RegNets
     ('RegNetX-0.8', 'regnetx_008', 224),
@@ -71,7 +71,8 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     # ConvNeXt
     ('ConvNeXt-T', 'convnext_tiny', 224),
     ('ConvNeXt-S', 'convnext_small', 224),
-    ('ConvNeXt-B', 'convnext_base', 224),
+    ('ConvNeXt-B', 'convnext_base_384_in22ft1k', 224),
+    ('ConvNeXt-L', 'convnext_large_384_in22ft1k', 224),
 ]
 
 random_model_names = [

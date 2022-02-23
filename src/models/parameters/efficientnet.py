@@ -208,20 +208,20 @@ imagenet_models = {
         imagenet_params,
         layers=make_efficientnetv2_s_layers(divisor=8),
         stem_channels=24, head_channels=1280,
-        timm_name='tf_efficientnetv2_s',
+        timm_name='tf_efficientnetv2_s_in21ft1k',
         timm_loader=load_efficientnet_parameters),
 
     'EfficientNetV2-M': clone_params(
         imagenet_params,
         layers=make_efficientnetv2_m_layers(divisor=8),
         stem_channels=24, head_channels=1280,
-        timm_name='tf_efficientnetv2_m',
+        timm_name='tf_efficientnetv2_m_in21ft1k',
         timm_loader=load_efficientnet_parameters),
 
     'EfficientNetV2-L': clone_params(
         imagenet_params,
         layers=make_efficientnetv2_l_layers(divisor=8),
         stem_channels=32, head_channels=1280,
-        timm_name='tf_efficientnetv2_l',
+        timm_name='tf_efficientnetv2_l_in21ft1k',
         timm_loader=load_efficientnet_parameters),
 }
