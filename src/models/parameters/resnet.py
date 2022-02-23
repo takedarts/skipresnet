@@ -134,6 +134,15 @@ imagenet_models = {
         operation=BottleneckOperation,
         timm_name='resnet101d',
         timm_loader=load_resnetd_parameters),
+
+    'ResNetD-152': clone_params(
+        imagenet_params,
+        layers=make_resnet_layers([3, 8, 36, 3], 64, 1, 4),
+        stem_channels=64, head_channels=2048,
+        stem=DeepLargeStem, downsample=AverageLinearDownsample,
+        operation=BottleneckOperation,
+        timm_name='resnet152d',
+        timm_loader=load_resnetd_parameters),
 }
 
 

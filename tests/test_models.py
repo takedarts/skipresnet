@@ -17,6 +17,7 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('ResNeXt-101-32x8d', 'resnext101_32x8d', 224),
     ('ResNetD-50', 'resnet50d', 224),
     ('ResNetD-101', 'resnet101d', 224),
+    ('ResNetD-152', 'resnet152d', 224),
 
     # ResNeSt
     ('ResNeSt-50-2s1x64d', 'resnest50d', 224),
