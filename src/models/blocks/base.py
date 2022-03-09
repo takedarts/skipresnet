@@ -109,6 +109,7 @@ class BasicBlock(_Block):
         operation: Callable[..., nn.Module],
         downsample: Callable[..., nn.Module],
         junction: Callable[..., nn.Module],
+        activation: Callable[..., nn.Module],
         **kwargs,
     ) -> None:
         super().__init__(
@@ -117,8 +118,9 @@ class BasicBlock(_Block):
             operation=operation,
             downsample=downsample,
             junction=junction,
+            activation=activation,
             preprocess=nn.Identity(),
-            postprocess=nn.ReLU(inplace=True),
+            postprocess=activation(inplace=True),
             downsample_before_block=False,
             **kwargs)
 
