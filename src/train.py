@@ -32,28 +32,71 @@ except BaseException:
     xm = None
 
 
-parser = argparse.ArgumentParser(
-    description='Train a model',
-    formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('config', type=str, help='Config file.')
-parser.add_argument('output', type=str, help='Output path.')
-parser.add_argument('--data', type=str, default=None, help='Data directory.')
-parser.add_argument('--precision', type=int, default=32, choices=[16, 32], help='Precision of training.')
-parser.add_argument('--gpus', type=lambda x: list(map(int, x.split(','))), default=None, help='GPU IDs.')
-parser.add_argument('--tpus', type=int, default=None, help='Number of TPU cores.')
-parser.add_argument('--workers', type=int, default=1, help='Number of workers for data loaders.')
-parser.add_argument('--accum', type=int, default=1, help='Number of accumlated batches.')
-parser.add_argument('--timestamp', action='store_true', default=False, help='Make a timestamp file.')
-parser.add_argument('--wandb', action='store_true', default=False, help='Run with W&B logger.')
-parser.add_argument('--neptune', action='store_true', default=False, help='Run with Neptune logger.')
-parser.add_argument('--gsbacket', type=str, default=None, help='Backet URL of google cloud strage.')
-parser.add_argument('--progress-step', type=int, default=10, help='Interval among print progress bar.')
-parser.add_argument('--log-step', type=int, default=10, help='Interval among logging steps.')
-parser.add_argument('--seed', type=int, default=2021, help='Random seed.')
-parser.add_argument('--debug', action='store_true', default=False, help='Run with debug mode.')
-
-
 LOGGER = logging.getLogger(__name__)
+
+
+def _parse_params_arg(arg: str) -> Dict[str, str]:
+    params = [p.split(':') for p in arg.split(',')]
+    return {k.strip(): v.strip() for k, v in params}
+
+
+def _parse_gpus_arg(arg: str) -> List[int]:
+    return list(map(int, arg.split(',')))
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description='Train a model',
+        formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('config', type=str, help='Configuration file.')
+    parser.add_argument('output', type=str, help='Output directory.')
+    parser.add_argument(
+        '--parameters', type=_parse_params_arg, default={},
+        help='Additional parameter for training the model.')
+    parser.add_argument(
+        '--data', type=str, default=None,
+        help='Data directory.')
+    parser.add_argument(
+        '--precision', type=int, default=32, choices=[16, 32],
+        help='Precision of training.')
+    parser.add_argument(
+        '--gpus', type=_parse_gpus_arg, default=None,
+        help='GPU IDs used for training.')
+    parser.add_argument(
+        '--tpus', type=int, default=None,
+        help='Number of TPU cores used for training.')
+    parser.add_argument(
+        '--workers', type=int, default=1,
+        help='Number of workers for data loaders.')
+    parser.add_argument(
+        '--accum', type=int, default=1,
+        help='Number of accumlated batches.')
+    parser.add_argument(
+        '--timestamp', action='store_true', default=False,
+        help='Timestamp file is created.')
+    parser.add_argument(
+        '--wandb', action='store_true', default=False,
+        help='W&B logger is used.')
+    parser.add_argument(
+        '--neptune', action='store_true', default=False,
+        help='Neptune logger is used.')
+    parser.add_argument(
+        '--gsbacket', type=str, default=None,
+        help='Backet URL of google cloud strage.')
+    parser.add_argument(
+        '--progress-step', type=int, default=10,
+        help='Number of steps among updating progress bar.')
+    parser.add_argument(
+        '--log-step', type=int, default=10,
+        help='Number of steps among updating logs.')
+    parser.add_argument(
+        '--seed', type=int, default=2021,
+        help='Random seed.')
+    parser.add_argument(
+        '--debug', action='store_true', default=False,
+        help='Run with debug mode.')
+
+    return parser.parse_args()
 
 
 def _run_gsutil(args: List[str]) -> None:
@@ -152,10 +195,14 @@ class TimestampWriter(plc.Callback):
 
 
 class Model(pl.LightningModule):
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, parameters: Dict[str, str]) -> None:
         super().__init__()
         self.config = config
-        self.model = create_model(config.model, config.dataset, **config.parameters)
+        self.params = config.parameters.copy()
+        self.params.update(parameters)
+
+        self.model = create_model(
+            config.model, config.dataset, **self.params)
         self.optimizer_states_dict: Optional[Dict] = None
         self.scheduler_states_dict: Optional[Dict] = None
         self.train_logs: List[Dict[str, Any]] = []
@@ -178,8 +225,16 @@ class Model(pl.LightningModule):
         return [optimizer], [scheduler]
 
     def optimizer_step(
-            self, epoch, batch_idx, optimizer, optimizer_idx=0, optimizer_closure=None,
-            on_tpu=False, using_native_amp=False, using_lbfgs=False):
+        self,
+        epoch,
+        batch_idx,
+        optimizer,
+        optimizer_idx=0,
+        optimizer_closure=None,
+        on_tpu=False,
+        using_native_amp=False,
+        using_lbfgs=False
+    ):
         if on_tpu and xm is not None:
             def optimizer_closure_2():
                 optimizer_closure()
@@ -310,7 +365,7 @@ class Model(pl.LightningModule):
         checkpoint['config'] = {
             'model': self.config.model,
             'dataset': self.config.dataset,
-            'parameters': self.config.parameters
+            'parameters': self.params,
         }
         checkpoint['train_logs'] = self.train_logs
         checkpoint['valid_logs'] = self.valid_logs
@@ -403,6 +458,7 @@ class NeptuneLogger(pll.NeptuneLogger):
         kwargs['api_key'] = re.sub(r'\s+', '', api_token)
         kwargs['project'] = f'{user_name}/{project_name[0]}'
         kwargs['name'] = project_name[-1]
+        kwargs['fail_on_exception'] = False
 
         super().__init__(**kwargs)
         self._save_path = save_path
@@ -524,6 +580,7 @@ def create_trainer(
 
 def train_model(
     config: Config,
+    parameters: Dict[str, str],
     output_path: pathlib.Path,
     data_path: str,
     num_workers: int = 1,
@@ -545,7 +602,7 @@ def train_model(
     os.makedirs(output_path, exist_ok=True)
 
     # make training modules
-    model = Model(config)
+    model = Model(config, parameters)
     datamodule = DataModule(
         config, data_path, num_workers, num_accum, gpus, tpus)
 
@@ -566,7 +623,7 @@ def train_model(
 
 
 def main() -> None:
-    args = parser.parse_args()
+    args = parse_args()
     setup_logging(args.debug)
     setup_random_seed(args.seed)
 
@@ -589,6 +646,7 @@ def main() -> None:
 
     train_model(
         config=config,
+        parameters=args.parameters,
         output_path=pathlib.Path(args.output),
         data_path=data_path,
         num_workers=args.workers,
