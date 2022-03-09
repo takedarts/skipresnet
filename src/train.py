@@ -514,13 +514,17 @@ def create_trainer(
 ) -> pl.Trainer:
     # loggers
     loggers: List[pll.LightningLoggerBase] = [
-        pll.TensorBoardLogger(save_dir=str(output_path / 'tensorboard'), name='')]
+        pll.TensorBoardLogger(
+            save_dir=str(output_path / 'tensorboard'), name='', version=0)
+    ]
 
     if wandb is not None:
-        loggers.append(WandbLogger(save_path=output_path, wandb_name=wandb))
+        loggers.append(
+            WandbLogger(save_path=output_path, wandb_name=wandb))
 
     if neptune is not None:
-        loggers.append(NeptuneLogger(save_path=output_path, neptune_name=neptune))
+        loggers.append(
+            NeptuneLogger(save_path=output_path, neptune_name=neptune))
 
     # checkpoint
     callbacks: List[plc.Callback] = [
@@ -528,7 +532,7 @@ def create_trainer(
             dirpath=str(output_path / 'checkpoint'),
             filename='epoch_{epoch:03d}', auto_insert_metric_name=False,
             save_last=True, save_top_k=1, monitor='valid/accuracy1', mode='max'),
-        plc.ProgressBar(refresh_rate=progress_step),
+        plc.TQDMProgressBar(refresh_rate=progress_step),
     ]
 
     if timestamp is not None:
@@ -554,8 +558,7 @@ def create_trainer(
         parameters['deterministic'] = True
         parameters['benchmark'] = True
         parameters['precision'] = precision
-        parameters['accelerator'] = 'ddp_spawn'
-        parameters['plugins'] = [plp.DDPPlugin(find_unused_parameters=False)]
+        parameters['strategy'] = plp.DDPPlugin(find_unused_parameters=False)
     elif tpus is not None:
         parameters['precision'] = precision
         parameters['tpu_cores'] = tpus
@@ -569,11 +572,6 @@ def create_trainer(
     elif config.parameters['gradclip_norm'] > 0:
         parameters['gradient_clip_algorithm'] = 'norm'
         parameters['gradient_clip_val'] = config.parameters['gradclip_value']
-
-    # resume
-    output_file = output_path / 'checkpoint' / 'last.ckpt'
-    if output_file.is_file():
-        parameters['resume_from_checkpoint'] = str(output_file)
 
     return pl.Trainer(**parameters)
 
@@ -610,12 +608,19 @@ def train_model(
     if gsbacket is not None:
         prepare_gsbacket(gsbacket, output_path)
 
+    # resume setting
+    output_file = output_path / 'checkpoint' / 'last.ckpt'
+    if output_file.is_file():
+        checkpoint_path = str(output_file)
+    else:
+        checkpoint_path = None
+
     # training
     create_trainer(
         config, output_path, num_accum, precision, gpus, tpus,
         timestamp, wandb, neptune, gsbacket, progress_step, log_step,
     ).fit(
-        model=model, datamodule=datamodule)
+        model=model, datamodule=datamodule, ckpt_path=checkpoint_path)
 
     # update the google strage backset
     if gsbacket is not None:
