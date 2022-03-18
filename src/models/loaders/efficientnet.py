@@ -23,8 +23,10 @@ def load_efficientnet_parameters(model: Any, timm_model: Any) -> None:
 
     model.head.conv.load_state_dict(timm_model.conv_head.state_dict())
     model.head.norm.load_state_dict(timm_model.bn2.state_dict())
-    model.classifier.conv.weight.data[:] = timm_model.classifier.weight[:, :, None, None].data
-    model.classifier.conv.bias.data[:] = timm_model.classifier.bias.data
+
+    if model.classifier.conv.weight.shape[:2] == timm_model.classifier.weight.shape:
+        model.classifier.conv.weight.data[:] = timm_model.classifier.weight[:, :, None, None].data
+        model.classifier.conv.bias.data[:] = timm_model.classifier.bias.data
 
 
 def _load_inverted_block_parameters(block: Any, timm_block: Any) -> None:

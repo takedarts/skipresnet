@@ -28,5 +28,7 @@ def load_densenet_parameters(model: Any, timm_model: Any) -> None:
             index += 1
 
     model.head.norm.load_state_dict(timm_model.features.norm5.state_dict())
-    model.classifier.conv.weight.data[:] = timm_model.classifier.weight[:, :, None, None].data
-    model.classifier.conv.bias.data[:] = timm_model.classifier.bias.data
+
+    if model.classifier.conv.weight.shape[:2] == timm_model.classifier.weight.shape:
+        model.classifier.conv.weight.data[:] = timm_model.classifier.weight[:, :, None, None].data
+        model.classifier.conv.bias.data[:] = timm_model.classifier.bias.data

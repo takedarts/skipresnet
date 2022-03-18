@@ -25,8 +25,10 @@ def load_mobilenetv2_parameters(model: Any, timm_model: Any) -> None:
 
     model.head.conv.load_state_dict(timm_model.conv_head.state_dict())
     model.head.norm.load_state_dict(timm_model.bn2.state_dict())
-    model.classifier.conv.weight.data[:] = timm_model.classifier.weight[:, :, None, None].data
-    model.classifier.conv.bias.data[:] = timm_model.classifier.bias.data
+
+    if model.classifier.conv.weight.shape[:2] == timm_model.classifier.weight.shape:
+        model.classifier.conv.weight.data[:] = timm_model.classifier.weight[:, :, None, None].data
+        model.classifier.conv.bias.data[:] = timm_model.classifier.bias.data
 
 
 def load_mobilenetv3_parameters(model: Any, timm_model: Any) -> None:
@@ -59,5 +61,7 @@ def load_mobilenetv3_parameters(model: Any, timm_model: Any) -> None:
     model.head.conv1.load_state_dict(timm_model.blocks[-1][0].conv.state_dict())
     model.head.norm1.load_state_dict(timm_model.blocks[-1][0].bn1.state_dict())
     model.head.conv2.load_state_dict(timm_model.conv_head.state_dict())
-    model.classifier.conv.weight.data[:] = timm_model.classifier.weight[:, :, None, None].data
-    model.classifier.conv.bias.data[:] = timm_model.classifier.bias.data
+
+    if model.classifier.conv.weight.shape[:2] == timm_model.classifier.weight.shape:
+        model.classifier.conv.weight.data[:] = timm_model.classifier.weight[:, :, None, None].data
+        model.classifier.conv.bias.data[:] = timm_model.classifier.bias.data

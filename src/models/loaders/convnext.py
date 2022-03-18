@@ -17,7 +17,9 @@ def load_convnext_parameters(model: Any, timm_model: Any) -> None:
             index += 1
 
     model.classifier.norm.load_state_dict(timm_model.head.norm.state_dict())
-    _load_linear_to_conv2d_parameters(model.classifier.conv, timm_model.head.fc)
+
+    if model.classifier.conv.weight.shape[:2] == timm_model.head.fc.weight.shape:
+        _load_linear_to_conv2d_parameters(model.classifier.conv, timm_model.head.fc)
 
 
 def _load_convnext_block_parameters(block: Any, timm_block: Any) -> None:

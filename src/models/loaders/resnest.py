@@ -45,5 +45,6 @@ def load_resnest_parameters(model: Any, timm_model: Any) -> None:
 
             index += 1
 
-    model.classifier.conv.weight.data[:] = timm_model.fc.weight[:, :, None, None].data
-    model.classifier.conv.bias.data[:] = timm_model.fc.bias.data
+    if model.classifier.conv.weight.shape[:2] == timm_model.fc.weight.shape:
+        model.classifier.conv.weight.data[:] = timm_model.fc.weight[:, :, None, None].data
+        model.classifier.conv.bias.data[:] = timm_model.fc.bias.data

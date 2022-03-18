@@ -22,5 +22,7 @@ def load_vit_parameters(model: Any, timm_model: Any) -> None:
             timm_model.blocks[i].mlp.fc2.state_dict())
 
     model.head.norm.load_state_dict(timm_model.norm.state_dict())
-    model.classifier.conv.weight.data[:] = timm_model.head.weight[:, :, None, None].data
-    model.classifier.conv.bias.data[:] = timm_model.head.bias.data
+
+    if model.classifier.conv.weight.shape[:2] == timm_model.head.weight.shape:
+        model.classifier.conv.weight.data[:] = timm_model.head.weight[:, :, None, None].data
+        model.classifier.conv.bias.data[:] = timm_model.head.bias.data

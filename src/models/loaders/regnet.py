@@ -29,5 +29,6 @@ def load_regnet_parameters(model: Any, timm_model: Any) -> None:
 
             index += 1
 
-    model.classifier.conv.weight.data[:] = timm_model.head.fc.weight[:, :, None, None].data
-    model.classifier.conv.bias.data[:] = timm_model.head.fc.bias.data
+    if model.classifier.conv.weight.shape[:2] == timm_model.head.fc.weight.shape:
+        model.classifier.conv.weight.data[:] = timm_model.head.fc.weight[:, :, None, None].data
+        model.classifier.conv.bias.data[:] = timm_model.head.fc.bias.data
