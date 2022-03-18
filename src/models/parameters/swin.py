@@ -100,4 +100,15 @@ imagenet_models = {
         patch_size=4, mlp_ratio=4.0,
         timm_name='swin_base_patch4_window7_224',
         timm_loader=load_swin_parameters),
+
+    'SwinBasePatch4-384': clone_params(
+        imagenet_params,
+        layers=make_swin_layers(
+            depths=[2, 2, 18, 2], channels=128,
+            feature_size=96, window_size=12, attn_heads=4),
+        stem_channels=128, head_channels=1024,
+        patch_size=4, mlp_ratio=4.0,
+        timm_name='swin_base_patch4_window12_384',
+        timm_loader=load_swin_parameters),
+
 }
