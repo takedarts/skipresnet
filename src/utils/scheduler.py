@@ -12,12 +12,26 @@ def create_scheduler(
     train_lastlr: float,
     **kwargs,
 ) -> _LRScheduler:
-    if train_schedule == 'cosine':
+    if train_schedule == 'constant':
+        return ConstantLR(optimizer)
+    elif train_schedule == 'cosine':
         return CosineAnnealingLR(optimizer, train_epoch, train_warmup, train_lastlr)
     elif train_schedule == 'exponential':
         return ExponentialLR(optimizer, train_epoch, train_warmup, train_lastlr)
     else:
         raise Exception('unsupported scheduler: {}'.format(train_schedule))
+
+
+class ConstantLR(_LRScheduler):
+    def __init__(
+        self,
+        optimizer: optim.Optimizer,
+        last_epoch: int = -1
+    ) -> None:
+        super().__init__(optimizer, last_epoch)
+
+    def get_lr(self):
+        return self.base_lrs
 
 
 class CosineAnnealingLR(_LRScheduler):
@@ -43,9 +57,6 @@ class CosineAnnealingLR(_LRScheduler):
             lrs = [(self.last_epoch + 1) / (self.T_wup + 1) * lr for lr in lrs]
 
         return lrs
-
-    def load_state_dict(self, state_dict: dict) -> None:
-        return super().load_state_dict(state_dict)
 
 
 class ExponentialLR(_LRScheduler):
