@@ -6,6 +6,7 @@ train_epoch: 300
 train_warmup: 5
 train_optim: sgd
 train_lr: 0.4
+train_layerlrdecay: 1.0
 train_momentum: 0.9
 train_eps: 1e-8
 train_alpha: 0.99

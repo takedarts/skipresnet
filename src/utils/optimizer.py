@@ -1,26 +1,29 @@
+from typing import Any, Dict, List
+
+import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.modules.batchnorm
+from models import Model
+from models.operations.swin import WindowAttention
+
 from .optimizers import SAM, RMSpropTF
 
+# Normalization classes.
 NORM_CLASSES = (
     torch.nn.modules.batchnorm._BatchNorm,
+    torch.nn.modules.instancenorm._InstanceNorm,
     nn.GroupNorm,
     nn.LayerNorm,
-)
-
-BIAS_CLASSES = (
-    nn.Conv1d,
-    nn.Conv2d,
-    nn.Conv3d,
-    nn.Linear,
+    nn.LocalResponseNorm,
+    nn.CrossMapLRN2d,
 )
 
 
 def create_optimizer(
-    model: nn.Module,
+    model: Model,
     train_optim: str,
     train_lr: float,
+    train_layerlrdecay: float,
     train_momentum: float,
     train_eps: float,
     train_alpha: float,
@@ -28,35 +31,36 @@ def create_optimizer(
     train_bdecay: bool,
     **kwargs,
 ) -> optim.Optimizer:
-    if train_bdecay:
-        parameters = [{
-            'params': [p for p in model.parameters() if p.requires_grad],
-            'weight_decay': train_wdecay}]
+    # Make parameter groups.
+    if train_layerlrdecay == 1.0:
+        parameters = _create_parameter_group(
+            modules=[model],
+            train_lr=train_lr,
+            train_wdecay=train_wdecay,
+            train_bdecay=train_bdecay)
     else:
-        norm_names = set()
-        bias_names = set()
-        nodecay_params = []
-        decay_params = []
+        parameters = _create_parameter_group(
+            modules=[model.head, model.classifier],
+            train_lr=train_lr,
+            train_wdecay=train_wdecay,
+            train_bdecay=train_bdecay)
 
-        for name, module in model.named_modules():
-            if isinstance(module, NORM_CLASSES):
-                norm_names.add(name)
-            elif isinstance(module, BIAS_CLASSES):
-                bias_names.add(f'{name}.bias')
+        for i, block in enumerate(model.blocks[::-1]):
+            parameters.extend(_create_parameter_group(
+                modules=[block],
+                train_lr=train_lr * train_layerlrdecay**(i + 1),
+                train_wdecay=train_wdecay,
+                train_bdecay=train_bdecay
+            ))
 
-        for name, param in model.named_parameters():
-            if not param.requires_grad:
-                continue
-            elif (name.rsplit('.', maxsplit=1)[0] in norm_names
-                  or name in bias_names):
-                nodecay_params.append(param)
-            else:
-                decay_params.append(param)
+        parameters.extend(_create_parameter_group(
+            modules=[model.stem],
+            train_lr=train_lr * train_layerlrdecay**(len(model.blocks) + 1),
+            train_wdecay=train_wdecay,
+            train_bdecay=train_bdecay
+        ))
 
-        parameters = [
-            {'params': nodecay_params, 'weight_decay': 0.0},
-            {'params': decay_params, 'weight_decay': train_wdecay}]
-
+    # Make the optimizer.
     if train_optim == 'sgd':
         return optim.SGD(
             parameters, lr=train_lr, momentum=train_momentum, nesterov=True)
@@ -75,3 +79,51 @@ def create_optimizer(
             parameters, lr=train_lr, momentum=train_momentum, nesterov=True)
     else:
         raise Exception('unsupported optimizer: {}'.format(train_optim))
+
+
+def _create_parameter_group(
+    modules: List[nn.Module],
+    train_lr: float,
+    train_wdecay: float,
+    train_bdecay: bool,
+) -> List[Dict[str, Any]]:
+    # Make a parameter group which contains all parameters.
+    if train_bdecay:
+        params: List[nn.Parameter] = []
+        for module in modules:
+            params.extend(p for p in module.parameters() if p.requires_grad)
+        return [dict(params=params, lr=train_lr, weight_decay=train_wdecay)]
+
+    # Make two parameter groups:
+    # nodecay_group: parameters which are updated without weight decay.
+    # decay_group: parameters which are updated with weight decay.
+    # A parameter `relative_position_bias_table` in WindowAttention is
+    # considered a bias parameter.
+    nodecay_group: List[nn.Parameter] = []
+    decay_group: List[nn.Parameter] = []
+
+    for module in modules:
+        children = {n: m for n, m in module.named_modules()}
+        children[''] = module
+
+        for name, param in module.named_parameters():
+            if not param.requires_grad:
+                continue
+
+            if '.' in name:
+                parent_name, param_name = name.rsplit('.', maxsplit=1)
+            else:
+                parent_name, param_name = '', name
+
+            if (isinstance(children[parent_name], NORM_CLASSES)
+                    or param_name == 'bias'
+                    or (isinstance(children[parent_name], WindowAttention)
+                        and param_name == 'relative_position_bias_table')):
+                nodecay_group.append(param)
+            else:
+                decay_group.append(param)
+
+    return [
+        dict(params=nodecay_group, lr=train_lr, weight_decay=0.0),
+        dict(params=decay_group, lr=train_lr, weight_decay=train_wdecay),
+    ]

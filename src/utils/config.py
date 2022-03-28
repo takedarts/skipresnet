@@ -7,6 +7,7 @@ PARAMETERS: List[Tuple[str, Any, str]] = [
     ('train_warmup', 5, 'Number of epochs for warmup.'),
     ('train_optim', 'sgd', 'Optimizer name (sgd/adamw/rmsprop/rmsproptf/sam).'),
     ('train_lr', 0.025, 'Initial learning rate.'),
+    ('train_layerlrdecay', 1.0, 'Decay ratio of layer-wise learning rate decay.'),
     ('train_momentum', 0.9, 'Momentum factor of optimizer.'),
     ('train_eps', 1e-08, 'Machine epsilon for optimizer stabilization.'),
     ('train_alpha', 0.99, 'Smoothing constant of optimizer.'),
