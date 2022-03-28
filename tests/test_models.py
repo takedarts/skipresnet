@@ -69,6 +69,8 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('SwinSmallPatch4-224', 'swin_small_patch4_window7_224', 224),
     ('SwinBasePatch4-224', 'swin_base_patch4_window7_224', 224),
     ('SwinBasePatch4-384', 'swin_base_patch4_window12_384', 384),
+    ('SwinLargePatch4-224', 'swin_large_patch4_window7_224', 224),
+    ('SwinLargePatch4-384', 'swin_large_patch4_window12_384', 384),
 
     # ConvNeXt
     ('ConvNeXt-T', 'convnext_tiny', 224),

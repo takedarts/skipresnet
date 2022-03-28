@@ -111,4 +111,45 @@ imagenet_models = {
         timm_name='swin_base_patch4_window12_384',
         timm_loader=load_swin_parameters),
 
+    'SwinLargePatch4-224': clone_params(
+        imagenet_params,
+        layers=make_swin_layers(
+            depths=[2, 2, 18, 2], channels=192,
+            feature_size=56, window_size=7, attn_heads=6),
+        stem_channels=192, head_channels=1536,
+        patch_size=4, mlp_ratio=4.0,
+        timm_name='swin_large_patch4_window7_224',
+        timm_loader=load_swin_parameters),
+
+    'SwinLargePatch4-384': clone_params(
+        imagenet_params,
+        layers=make_swin_layers(
+            depths=[2, 2, 18, 2], channels=192,
+            feature_size=96, window_size=12, attn_heads=6),
+        stem_channels=192, head_channels=1536,
+        patch_size=4, mlp_ratio=4.0,
+        timm_name='swin_large_patch4_window12_384',
+        timm_loader=load_swin_parameters),
 }
+
+imagenet_models.update({
+    'SwinBasePatch4-224-22k': clone_params(
+        imagenet_models['SwinBasePatch4-224'],
+        timm_name='swin_base_patch4_window7_224_in22k',
+    ),
+
+    'SwinBasePatch4-384-22k': clone_params(
+        imagenet_models['SwinBasePatch4-384'],
+        timm_name='swin_base_patch4_window7_384_in22k',
+    ),
+
+    'SwinLargePatch4-224-22k': clone_params(
+        imagenet_models['SwinLargePatch4-224'],
+        timm_name='swin_large_patch4_window7_224_in22k',
+    ),
+
+    'SwinLargePatch4-384-22k': clone_params(
+        imagenet_models['SwinLargePatch4-384'],
+        timm_name='swin_large_patch4_window7_384_in22k',
+    ),
+})
