@@ -36,7 +36,9 @@ def _download(path: pathlib.Path, url: str, size: int = None) -> None:
     if size is None:
         size = int(response.headers['content-length'])
 
-    with tqdm.tqdm(total=size, unit='B', unit_scale=True) as progbar:
+    with tqdm.tqdm(
+        total=size, unit='B', unit_scale=True, desc='Downloading'
+    ) as progbar:
         with open(path, 'wb') as writer:
             for chunk in response.iter_content(chunk_size=1024):
                 writer.write(chunk)
@@ -48,7 +50,9 @@ def _verify(path: pathlib.Path, digest: str) -> None:
     hashobj = hashlib.new(digest_name)
     size = path.stat().st_size
 
-    with tqdm.tqdm(total=size, unit='B', unit_scale=True) as progbar:
+    with tqdm.tqdm(
+        total=size, unit='B', unit_scale=True, desc='Verifying'
+    ) as progbar:
         with open(path, 'rb') as reader:
             while True:
                 binary = reader.read(102400)
