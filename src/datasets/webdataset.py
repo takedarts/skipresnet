@@ -51,6 +51,9 @@ class Processor(wds.Processor):
     def __init__(self, loader, length, sampler):
         self.length = length
         self.sampler = sampler
+        # Attribute `dataset` is a mimic attribute which is required for
+        # pytorch_lightning.plugins.training_type.TPUSpawnPlugin
+        self.dataset = None
         super().__init__(loader, wds.iterators.identity)
 
     def __len__(self):

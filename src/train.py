@@ -1,4 +1,5 @@
 import argparse
+import functools
 import gc
 import json
 import logging
@@ -7,7 +8,7 @@ import pathlib
 import re
 import subprocess
 import time
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 from weakref import ReferenceType
 
 import pytorch_lightning as pl
@@ -16,7 +17,9 @@ import pytorch_lightning.loggers as pll
 import pytorch_lightning.plugins as plp
 import torch
 import torch.autograd
+import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 import torchmetrics
 
 from datasets import (create_train_dataloader, create_valid_dataloader,
@@ -30,7 +33,6 @@ try:
     import torch_xla.core.xla_model as xm  # type:ignore
 except BaseException:
     xm = None
-
 
 LOGGER = logging.getLogger(__name__)
 
@@ -223,26 +225,6 @@ class Model(pl.LightningModule):
             scheduler.load_state_dict(self.scheduler_states_dict)
 
         return [optimizer], [scheduler]
-
-    def optimizer_step(
-        self,
-        epoch,
-        batch_idx,
-        optimizer,
-        optimizer_idx=0,
-        optimizer_closure=None,
-        on_tpu=False,
-        using_native_amp=False,
-        using_lbfgs=False
-    ):
-        if on_tpu and xm is not None:
-            def optimizer_closure_2():
-                optimizer_closure()
-                xm.reduce_gradients(optimizer)
-        else:
-            optimizer_closure_2 = optimizer_closure
-
-        optimizer.step(closure=optimizer_closure_2)
 
     def training_step(self, batch, batch_idx):
         images, probs = batch
@@ -498,6 +480,43 @@ class TPUSpawnPlugin(plp.TPUSpawnPlugin):
         super().new_process(*args, **kwargs)
 
 
+class TPUPrecisionPlugin(plp.TPUPrecisionPlugin):
+    def optimizer_step(
+        self,
+        model: Union[pl.LightningModule, nn.Module],
+        optimizer: optim.Optimizer,
+        optimizer_idx: int,
+        closure: Callable[[], Any],
+        **kwargs: Any,
+    ) -> Any:
+        if isinstance(model, pl.LightningModule):
+            closure = functools.partial(
+                self._wrap_closure, model, optimizer, optimizer_idx, closure)
+
+        def optimizer_closure():
+            result = closure()
+            xm.reduce_gradients(optimizer)
+            return result
+
+        optimizer.step(closure=optimizer_closure)
+
+
+class TPUBf16PrecisionPlugin(TPUPrecisionPlugin):
+    precision: str = "bf16"
+
+    def connect(
+        self,
+        model: nn.Module,
+        optimizers: List[optim.Optimizer],
+        lr_schedulers: List[Any],
+    ) -> Tuple[nn.Module, List[optim.Optimizer], List[Any]]:
+        os.environ["XLA_USE_BF16"] = "1"
+        return super().connect(model=model, optimizers=optimizers, lr_schedulers=lr_schedulers)
+
+    def teardown(self) -> None:
+        os.environ.pop("XLA_USE_BF16", None)
+
+
 def create_trainer(
     config: Config,
     output_path: pathlib.Path,
@@ -560,10 +579,14 @@ def create_trainer(
         parameters['precision'] = precision
         parameters['strategy'] = plp.DDPPlugin(find_unused_parameters=False)
     elif tpus is not None:
-        parameters['precision'] = precision
         parameters['tpu_cores'] = tpus
+        parameters['strategy'] = plp.TPUSpawnPlugin(find_unused_parameters=False)
         if precision == 16:
-            parameters['plugins'] = [TPUSpawnPlugin()]
+            parameters['precision'] = 'bf16'
+            parameters['plugins'] = [TPUBf16PrecisionPlugin()]
+        else:
+            parameters['precision'] = precision
+            parameters['plugins'] = [TPUPrecisionPlugin()]
 
     # gradient clipping
     if config.parameters['gradclip_value'] > 0:
@@ -597,7 +620,7 @@ def train_model(
     prepare_dataset(dataset_name=config.dataset, data_path=data_path)
 
     # make an output directory
-    os.makedirs(output_path, exist_ok=True)
+    os.makedirs(output_path / 'checkpoint', exist_ok=True)
 
     # make training modules
     model = Model(config, parameters)
