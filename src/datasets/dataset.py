@@ -3,15 +3,15 @@ from typing import Iterable
 from . import cifar, dummy, imagenet, imageneta
 
 
-def setup_dataloader(dataset_name: str, data_path: str) -> None:
+def prepare_dataset(dataset_name: str, data_path: str) -> None:
     if dataset_name in ('cifar10', 'cifar100'):
-        cifar.setup_dataloader(dataset_name, data_path)
+        cifar.prepare_dataset(dataset_name, data_path)
     elif dataset_name == 'imagenet':
-        imagenet.setup_dataloader(dataset_name, data_path)
+        imagenet.prepare_dataset(dataset_name, data_path)
     elif dataset_name == 'imageneta':
-        imageneta.setup_dataloader(dataset_name, data_path)
+        imageneta.prepare_dataset(dataset_name, data_path)
     elif dataset_name == 'dummy':
-        dummy.setup_dataloader(dataset_name, data_path)
+        dummy.prepare_dataset(dataset_name, data_path)
     else:
         raise Exception(f'Unsuppoted dataset: {dataset_name}')
 

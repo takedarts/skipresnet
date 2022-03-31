@@ -20,7 +20,7 @@ import torch.nn.functional as F
 import torchmetrics
 
 from datasets import (create_train_dataloader, create_valid_dataloader,
-                      setup_dataloader)
+                      prepare_dataset)
 from models import create_model
 from models.modules import DropBlock
 from utils import (Config, create_optimizer, create_scheduler, setup_logging,
@@ -594,7 +594,7 @@ def train_model(
     log_step: int = 10,
 ) -> None:
     # prepare the dataset
-    setup_dataloader(dataset_name=config.dataset, data_path=data_path)
+    prepare_dataset(dataset_name=config.dataset, data_path=data_path)
 
     # make an output directory
     os.makedirs(output_path, exist_ok=True)

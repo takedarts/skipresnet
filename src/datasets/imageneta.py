@@ -15,7 +15,7 @@ ARCHIVE_DIGEST = 'md5:c3e55429088dc681f30d81f4726b6595'
 ARCHIVE_SIZE = 687_552_512
 
 
-def setup_dataloader(dataset_name: str, data_path: str) -> None:
+def prepare_dataset(dataset_name: str, data_path: str) -> None:
     if dataset_name == 'imageneta':
         ImageNetADataset.prepare(pathlib.Path(data_path))
     else:

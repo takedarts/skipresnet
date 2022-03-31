@@ -8,7 +8,7 @@ import torch.nn.functional as F
 import torchmetrics
 import tqdm
 
-from datasets import create_valid_dataloader, setup_dataloader
+from datasets import create_valid_dataloader, prepare_dataset
 from models import create_model_from_checkpoint
 from utils import Config, setup_logging
 
@@ -89,7 +89,7 @@ def main() -> None:
         device = 'cpu'
 
     # prepare dataset
-    setup_dataloader(dataset_name=args.dataset, data_path=args.data)
+    prepare_dataset(dataset_name=args.dataset, data_path=args.data)
     loader = create_valid_dataloader(
         dataset_name=args.dataset, data_path=args.data, batch_size=args.batch_size,
         num_workers=0, num_cores=1, pin_memory=False, **config.parameters)

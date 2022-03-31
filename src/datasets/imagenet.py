@@ -27,7 +27,7 @@ TRAIN_SHARDS = 256
 VALID_SHARDS = 16
 
 
-def setup_dataloader(dataset_name: str, data_path: str) -> None:
+def prepare_dataset(dataset_name: str, data_path: str) -> None:
     if dataset_name == 'imagenet':
         url = urllib.parse.urlparse(data_path)
         if url.scheme == '' or url.scheme == 'file':
@@ -171,7 +171,7 @@ def _create_dataloader(
     else:
         num_workers = min(max(VALID_SHARDS // num_cores, 1), num_workers)
 
-    loader = wds.WebLoader(
+    webloader = wds.WebLoader(
         dataset,
         batch_size=None,
         shuffle=False,
@@ -180,9 +180,9 @@ def _create_dataloader(
         persistent_workers=num_workers > 0)
 
     num_batches = length // batch_size
-    loader = loader.repeat(sys.maxsize).with_epoch(num_batches)
+    webloader = webloader.repeat(sys.maxsize).with_epoch(num_batches)
 
-    return Processor(loader, num_batches, sampler)
+    return Processor(webloader, num_batches, sampler)
 
 
 def _create_dataset(

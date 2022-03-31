@@ -9,7 +9,7 @@ from .augmentations import (AutoAugmentCIFAR10, RandAugment,
                             apply_cutmixup_to_dataset)
 
 
-def setup_dataloader(dataset_name: str, data_path: str) -> None:
+def prepare_dataset(dataset_name: str, data_path: str) -> None:
     if dataset_name == 'cifar10':
         if not (pathlib.Path(data_path) / 'cifar-10-batches-py').is_dir():
             torchvision.datasets.CIFAR10(data_path, download=True, train=True)

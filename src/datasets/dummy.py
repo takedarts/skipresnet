@@ -4,7 +4,7 @@ import torch
 import torch.utils.data
 
 
-def setup_dataloader(dataset_name: str, data_path: str) -> None:
+def prepare_dataset(dataset_name: str, data_path: str) -> None:
     if dataset_name == 'dummy':
         pass
     else:
