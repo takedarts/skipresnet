@@ -159,6 +159,24 @@ def make_efficientnetv2_l_layers(
     return make_efficientnetv2_layers(settings, divisor=divisor)
 
 
+def make_efficientnetv2_xl_layers(
+    divisor: int
+) -> List[Tuple[int, int, Dict[str, Any]]]:
+    settings: List[Tuple[str, int, int, int, int, Any, int, bool, int, int]] = [
+        # style, kernel, channels, stride, expansion, activation, repeats
+        # se-module, se-reduction,se-divisor
+        ('conv', 3, 32, 1, 1, nn.SiLU, 4, False, 0, 0),
+        ('edge', 3, 64, 2, 4, nn.SiLU, 8, False, 0, 0),
+        ('edge', 3, 96, 2, 4, nn.SiLU, 8, False, 0, 0),
+        ('inverted', 3, 192, 2, 4, nn.SiLU, 16, True, 16, 8),
+        ('inverted', 3, 256, 1, 6, nn.SiLU, 24, True, 24, 8),
+        ('inverted', 3, 512, 2, 6, nn.SiLU, 32, True, 24, 8),
+        ('inverted', 3, 640, 1, 6, nn.SiLU, 8, True, 24, 8),
+    ]
+
+    return make_efficientnetv2_layers(settings, divisor=divisor)
+
+
 imagenet_params = dict(
     stem=EfficientNetStem,
     block=MobileNetBlock,
@@ -208,20 +226,44 @@ imagenet_models = {
         imagenet_params,
         layers=make_efficientnetv2_s_layers(divisor=8),
         stem_channels=24, head_channels=1280,
-        timm_name='tf_efficientnetv2_s_in21ft1k',
+        timm_name='tf_efficientnetv2_s',
         timm_loader=load_efficientnet_parameters),
 
     'EfficientNetV2-M': clone_params(
         imagenet_params,
         layers=make_efficientnetv2_m_layers(divisor=8),
         stem_channels=24, head_channels=1280,
-        timm_name='tf_efficientnetv2_m_in21ft1k',
+        timm_name='tf_efficientnetv2_m',
         timm_loader=load_efficientnet_parameters),
 
     'EfficientNetV2-L': clone_params(
         imagenet_params,
         layers=make_efficientnetv2_l_layers(divisor=8),
         stem_channels=32, head_channels=1280,
-        timm_name='tf_efficientnetv2_l_in21ft1k',
+        timm_name='tf_efficientnetv2_l',
         timm_loader=load_efficientnet_parameters),
 }
+
+imagenet_models.update({
+    'EfficientNetV2-S-22k': clone_params(
+        imagenet_models['EfficientNetV2-S'],
+        timm_name='tf_efficientnetv2_s_in21k',
+    ),
+
+    'EfficientNetV2-M-22k': clone_params(
+        imagenet_models['EfficientNetV2-M'],
+        timm_name='tf_efficientnetv2_m_in21k',
+    ),
+
+    'EfficientNetV2-L-22k': clone_params(
+        imagenet_models['EfficientNetV2-L'],
+        timm_name='tf_efficientnetv2_l_in21k',
+    ),
+
+    'EfficientNetV2-XL-22k': clone_params(
+        imagenet_params,
+        layers=make_efficientnetv2_xl_layers(divisor=8),
+        stem_channels=32, head_channels=1280,
+        timm_name='tf_efficientnetv2_xl_in21k',
+        timm_loader=load_efficientnet_parameters),
+})

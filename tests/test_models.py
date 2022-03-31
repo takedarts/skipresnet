@@ -38,9 +38,9 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('EfficientNet-B3', 'tf_efficientnet_b3', 224),
 
     # EfficientNetV2s
-    ('EfficientNetV2-S', 'tf_efficientnetv2_s_in21ft1k', 224),
-    ('EfficientNetV2-M', 'tf_efficientnetv2_m_in21ft1k', 224),
-    ('EfficientNetV2-L', 'tf_efficientnetv2_l_in21ft1k', 224),
+    ('EfficientNetV2-S', 'tf_efficientnetv2_s', 224),
+    ('EfficientNetV2-M', 'tf_efficientnetv2_m', 224),
+    ('EfficientNetV2-L', 'tf_efficientnetv2_l', 224),
 
     # RegNets
     ('RegNetX-0.8', 'regnetx_008', 224),
@@ -75,8 +75,8 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     # ConvNeXt
     ('ConvNeXt-T', 'convnext_tiny', 224),
     ('ConvNeXt-S', 'convnext_small', 224),
-    ('ConvNeXt-B', 'convnext_base_384_in22ft1k', 224),
-    ('ConvNeXt-L', 'convnext_large_384_in22ft1k', 224),
+    ('ConvNeXt-B', 'convnext_base', 224),
+    ('ConvNeXt-L', 'convnext_large', 224),
 ]
 
 random_model_names = [
@@ -85,6 +85,12 @@ random_model_names = [
     ('ResNet-152', 'resnet152', 224),
     ('SE-ResNet-34', 'seresnet34', 224),
     ('ResNeXt-101-32x4d', 'resnext101_32x4d', 224),
+
+    # EfficientNet
+    ('EfficientNetV2-XL-22k', 'tf_efficientnetv2_xl_in21k', 224),
+
+    # ConvNeXt
+    ('ConvNeXt-XL-22k', 'convnext_xlarge_in22k', 224),
 ]
 
 
@@ -92,8 +98,13 @@ random_model_names = [
     'model_name,timm_model_name,image_size',
     pretrained_model_names,
     ids=[n for n, _, _ in pretrained_model_names])
-def test_pretrained_models(model_name: str, timm_model_name: str, image_size: int) -> None:
-    timm_model = timm.create_model(timm_model_name, pretrained=True)
+def test_pretrained_models(
+    model_name: str,
+    timm_model_name: str,
+    image_size: int,
+) -> None:
+    timm_model = timm.create_model(
+        timm_model_name, num_classes=1000, pretrained=True)
     model = models.create_model(model_name, 'imagenet', pretrained=True)
 
     _test_model(model, timm_model, image_size=image_size)
@@ -103,8 +114,12 @@ def test_pretrained_models(model_name: str, timm_model_name: str, image_size: in
     'model_name,timm_model_name,image_size',
     random_model_names,
     ids=[n for n, _, _ in random_model_names])
-def test_random_models(model_name: str, timm_model_name: str, image_size: int) -> None:
-    timm_model = timm.create_model(timm_model_name)
+def test_random_models(
+    model_name: str,
+    timm_model_name: str,
+    image_size: int,
+) -> None:
+    timm_model = timm.create_model(timm_model_name, num_classes=1000)
     for parameter in timm_model.parameters():
         nn.init.normal_(parameter, 0.0, 0.1)
 
@@ -120,8 +135,10 @@ def _test_model(
     timm_model: nn.Module,
     image_size: int,
 ) -> None:
-    model_size = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    timm_model_size = sum(p.numel() for p in timm_model.parameters() if p.requires_grad)
+    model_size = sum(
+        p.numel() for p in model.parameters() if p.requires_grad)
+    timm_model_size = sum(
+        p.numel() for p in timm_model.parameters() if p.requires_grad)
 
     assert model_size == timm_model_size
 
