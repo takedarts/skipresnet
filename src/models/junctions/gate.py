@@ -1,4 +1,5 @@
 import collections
+import itertools
 import math
 from typing import Any, Callable, List, Tuple
 
@@ -87,7 +88,6 @@ class SkipJunction(GateJunction):
         settings: List[Tuple[int, int, int]],
         gate_normalization: Callable[[int], nn.Module],
         gate_activation: Callable[..., nn.Module],
-        gate_connections: int,
         **kwargs
     ) -> None:
         # index of the begining of the section
@@ -98,7 +98,7 @@ class SkipJunction(GateJunction):
 
         # indexes of skip connections
         inbounds = [index]
-        for i in range(gate_connections):
+        for i in itertools.count():
             inbound_index = index - (2 ** (i + 1)) + 1
             if inbound_index < start_index:
                 break
@@ -117,7 +117,7 @@ class DenseJunction(GateJunction):
         settings: List[Tuple[int, int, int]],
         gate_normalization: Callable[[int], nn.Module],
         gate_activation: Callable[..., nn.Module],
-        gate_connections: int,
+        dense_connections: int,
         **kwargs
     ) -> None:
         # index of the begining of the section
@@ -128,7 +128,7 @@ class DenseJunction(GateJunction):
 
         # indexes of skip connections
         inbounds = [index]
-        for i in range(gate_connections):
+        for i in range(dense_connections):
             inbound_index = index - 1 - i
             if inbound_index < start_index:
                 break
@@ -147,7 +147,6 @@ class DynamicJunction(nn.Module):
         settings: List[Tuple[int, int, int]],
         gate_normalization: Callable[[int], nn.Module],
         gate_activation: Callable[..., nn.Module],
-        gate_connections: int,
         gate_reduction: int,
         save_gate_weights: bool = False,
         **kwargs
@@ -161,7 +160,7 @@ class DynamicJunction(nn.Module):
 
         # indexes of skip connections
         inbounds = [index]
-        for i in range(gate_connections):
+        for i in itertools.count():
             inbound_index = index - (2 ** (i + 1)) + 1
             if inbound_index < start_index:
                 break
@@ -215,7 +214,6 @@ class StaticJunction(nn.Module):
         self,
         index: int,
         settings: List[Tuple[int, int, int]],
-        gate_connections: int,
         save_gate_weights: bool = False,
         **kwargs
     ) -> None:
@@ -228,7 +226,7 @@ class StaticJunction(nn.Module):
 
         # indexes of skip connections
         inbounds = [index]
-        for i in range(gate_connections):
+        for i in itertools.count():
             inbound_index = index - (2 ** (i + 1)) + 1
             if inbound_index < start_index:
                 break
@@ -266,7 +264,6 @@ class MeanJunction(nn.Module):
         self,
         index: int,
         settings: List[Tuple[int, int, int]],
-        gate_connections: int,
         **kwargs
     ) -> None:
         super().__init__()
@@ -278,7 +275,7 @@ class MeanJunction(nn.Module):
 
         # indexes of skip connections
         inbounds = [index]
-        for i in range(gate_connections):
+        for i in itertools.count():
             inbound_index = index - (2 ** (i + 1)) + 1
             if inbound_index < start_index:
                 break
@@ -306,7 +303,6 @@ class SumJunction(nn.Module):
         self,
         index: int,
         settings: List[Tuple[int, int, int]],
-        gate_connections: int,
         **kwargs
     ) -> None:
         super().__init__()
@@ -318,7 +314,7 @@ class SumJunction(nn.Module):
 
         # indexes of skip connections
         inbounds = [index]
-        for i in range(gate_connections):
+        for i in itertools.count():
             inbound_index = index - (2 ** (i + 1)) + 1
             if inbound_index < start_index:
                 break

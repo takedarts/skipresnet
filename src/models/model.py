@@ -164,7 +164,7 @@ def create_model(
         gate_reduction=8,
         gate_normalization=nn.BatchNorm2d,
         gate_activation=nn.ReLU,
-        gate_connections=4,
+        dense_connections=4,
         dropout_prob=0.0,
         shakedrop_prob=0.0,
         stochdepth_prob=0.0,
