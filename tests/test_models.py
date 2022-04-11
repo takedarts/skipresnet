@@ -6,12 +6,17 @@ import timm
 import torch
 import torch.nn as nn
 
+from references import load_reference_models
 
-pretrained_model_names: List[Tuple[str, str, int]] = [
+load_reference_models()
+
+PRETRAINED_MODEL_NAMES: List[Tuple[str, str, int]] = [
     # ResNets
     ('ResNet-18', 'resnet18', 224),
     ('ResNet-34', 'resnet34', 224),
     ('ResNet-50', 'resnet50', 224),
+    ('ResNet-101', 'resnet101', 224),
+    ('ResNet-152', 'resnet152', 224),
     ('SE-ResNet-50', 'seresnet50', 224),
     ('ResNeXt-50-32x4d', 'resnext50_32x4d', 224),
     ('ResNeXt-101-32x8d', 'resnext101_32x8d', 224),
@@ -19,7 +24,7 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('ResNetD-101', 'resnet101d', 224),
     ('ResNetD-152', 'resnet152d', 224),
 
-    # ResNeSt
+    # ResNeSts
     ('ResNeSt-50-2s1x64d', 'resnest50d', 224),
     ('ResNeSt-50-1s4x24d', 'resnest50d_1s4x24d', 224),
     ('ResNeSt-50-4s2x40d', 'resnest50d_4s2x40d', 224),
@@ -68,36 +73,35 @@ pretrained_model_names: List[Tuple[str, str, int]] = [
     ('SwinTinyPatch4-224', 'swin_tiny_patch4_window7_224', 224),
     ('SwinSmallPatch4-224', 'swin_small_patch4_window7_224', 224),
     ('SwinBasePatch4-224', 'swin_base_patch4_window7_224', 224),
-    ('SwinBasePatch4-384', 'swin_base_patch4_window12_384', 384),
     ('SwinLargePatch4-224', 'swin_large_patch4_window7_224', 224),
+    ('SwinBasePatch4-384', 'swin_base_patch4_window12_384', 384),
     ('SwinLargePatch4-384', 'swin_large_patch4_window12_384', 384),
 
-    # ConvNeXt
+    # ConvNeXts
     ('ConvNeXt-T', 'convnext_tiny', 224),
     ('ConvNeXt-S', 'convnext_small', 224),
     ('ConvNeXt-B', 'convnext_base', 224),
     ('ConvNeXt-L', 'convnext_large', 224),
 ]
 
-random_model_names = [
+
+RANDOM_MODEL_NAMES = [
     # ResNets
-    ('ResNet-101', 'resnet101', 224),
-    ('ResNet-152', 'resnet152', 224),
     ('SE-ResNet-34', 'seresnet34', 224),
     ('ResNeXt-101-32x4d', 'resnext101_32x4d', 224),
 
-    # EfficientNet
+    # EfficientNets
     ('EfficientNetV2-XL-22k', 'tf_efficientnetv2_xl_in21k', 224),
 
-    # ConvNeXt
+    # ConvNeXts
     ('ConvNeXt-XL-22k', 'convnext_xlarge_in22k', 224),
 ]
 
 
 @pytest.mark.parametrize(
     'model_name,timm_model_name,image_size',
-    pretrained_model_names,
-    ids=[n for n, _, _ in pretrained_model_names])
+    PRETRAINED_MODEL_NAMES,
+    ids=[n for n, _, _ in PRETRAINED_MODEL_NAMES])
 def test_pretrained_models(
     model_name: str,
     timm_model_name: str,
@@ -107,13 +111,13 @@ def test_pretrained_models(
         timm_model_name, num_classes=1000, pretrained=True)
     model = models.create_model(model_name, 'imagenet', pretrained=True)
 
-    _test_model(model, timm_model, image_size=image_size)
+    _assert_model(model, timm_model, image_size=image_size)
 
 
 @pytest.mark.parametrize(
     'model_name,timm_model_name,image_size',
-    random_model_names,
-    ids=[n for n, _, _ in random_model_names])
+    RANDOM_MODEL_NAMES,
+    ids=[n for n, _, _ in RANDOM_MODEL_NAMES])
 def test_random_models(
     model_name: str,
     timm_model_name: str,
@@ -126,11 +130,11 @@ def test_random_models(
     model = models.create_model(model_name, 'imagenet')
     model.load_model_parameters(timm_model)
 
-    _test_model(model, timm_model, image_size=image_size)
+    _assert_model(model, timm_model, image_size=image_size)
 
 
 @torch.no_grad()
-def _test_model(
+def _assert_model(
     model: nn.Module,
     timm_model: nn.Module,
     image_size: int,
