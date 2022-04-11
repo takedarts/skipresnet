@@ -6,9 +6,6 @@ import timm
 import torch
 import torch.nn as nn
 
-from references import load_reference_models
-
-load_reference_models()
 
 PRETRAINED_MODEL_NAMES: List[Tuple[str, str, int]] = [
     # ResNets
