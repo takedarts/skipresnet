@@ -1,4 +1,4 @@
-from ..blocks import BasicBlock
+from ..blocks import ResNetBlock
 from ..classifiers import LinearClassifier
 from ..downsamples import AverageLinearDownsample
 from ..heads import NoneHead
@@ -29,7 +29,7 @@ def make_resnest_layers(depths, channels, radix, groups, bottleneck):
 
 imagenet_params = dict(
     stem=DeepLargeStem,
-    block=BasicBlock,
+    block=ResNetBlock,
     operation=SplitAttentionOperation,
     downsample=AverageLinearDownsample,
     junction=AddJunction,
@@ -86,7 +86,7 @@ imagenet_models = {
 
 cifar_params = dict(
     stem=SmallStem,
-    block=BasicBlock,
+    block=ResNetBlock,
     operation=SplitAttentionOperation,
     downsample=AverageLinearDownsample,
     junction=AddJunction,

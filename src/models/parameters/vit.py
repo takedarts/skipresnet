@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Tuple
 
 import torch.nn as nn
 
-from ..blocks import ViTBlock
+from ..blocks import BaseBlock
 from ..classifiers import LinearClassifierWithoutDropout
 from ..downsamples import LinearDownsample
 from ..heads import ViTHead
@@ -36,7 +36,7 @@ def make_vit_layers(
 
 imagenet_params = dict(
     stem=ViTPatchStem,
-    block=ViTBlock,
+    block=BaseBlock,
     operation=ViTOperation,
     downsample=LinearDownsample,
     junction=AddJunction,

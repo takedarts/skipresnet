@@ -1,10 +1,10 @@
 from typing import Callable, List, Tuple
-from .base import _Block
+from .base import BaseBlock
 import torch.nn as nn
 from ..junctions import NoneJunction
 
 
-class DenseNetBlock(_Block):
+class DenseNetBlock(BaseBlock):
     '''
     Block class for DenseNets.
     '''

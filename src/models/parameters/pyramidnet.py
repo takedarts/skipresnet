@@ -1,7 +1,7 @@
 import itertools
 from typing import Any, Dict, List, Tuple
 
-from ..blocks import PreActivationBlock
+from ..blocks import BaseBlock
 from ..classifiers import LinearClassifier
 from ..downsamples import AverageDownsample
 from ..heads import PreActivationHead
@@ -39,7 +39,7 @@ def make_pyramid_layers(
 
 cifar_params = dict(
     stem=PreActSmallStem,
-    block=PreActivationBlock,
+    block=BaseBlock,
     operation=SingleActivationBasicOperation,
     downsample=AverageDownsample,
     junction=AddJunction,

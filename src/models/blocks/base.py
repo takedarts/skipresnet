@@ -7,7 +7,7 @@ import torch.nn as nn
 from ..modules import ShakeDrop, SignalAugmentation, StochasticDepth
 
 
-class _Block(nn.Module):
+class BaseBlock(nn.Module):
     def __init__(
         self,
         index: int,
@@ -15,15 +15,15 @@ class _Block(nn.Module):
         operation: Callable[..., nn.Module],
         downsample: Callable[..., nn.Module],
         junction: Callable[..., nn.Module],
-        preprocess: nn.Module,
-        postprocess: nn.Module,
         normalization: Callable[..., nn.Module],
         activation: Callable[..., nn.Module],
         dropblock: float,
         shakedrop_prob: float,
         stochdepth_prob: float,
         signalaugment: float,
-        downsample_before_block: bool,
+        preprocess: nn.Module = nn.Identity(),
+        postprocess: nn.Module = nn.Identity(),
+        downsample_before_block: bool = False,
         **kwargs
     ) -> None:
         super().__init__()
@@ -99,51 +99,3 @@ class _Block(nn.Module):
         x.append(y)
 
         return x
-
-
-class BasicBlock(_Block):
-    def __init__(
-        self,
-        index: int,
-        settings: List[Tuple[int, int, int]],
-        operation: Callable[..., nn.Module],
-        downsample: Callable[..., nn.Module],
-        junction: Callable[..., nn.Module],
-        **kwargs,
-    ) -> None:
-        super().__init__(
-            index=index,
-            settings=settings,
-            operation=operation,
-            downsample=downsample,
-            junction=junction,
-            preprocess=nn.Identity(),
-            postprocess=nn.ReLU(inplace=True),
-            downsample_before_block=False,
-            **kwargs)
-
-
-class PreActivationBlock(_Block):
-    '''
-    Block class for pre-actiovation ResNets.
-    '''
-
-    def __init__(
-        self,
-        index: int,
-        settings: List[Tuple[int, int, int]],
-        operation: Callable[..., nn.Module],
-        downsample: Callable[..., nn.Module],
-        junction: Callable[..., nn.Module],
-        **kwargs,
-    ) -> None:
-        super().__init__(
-            index=index,
-            settings=settings,
-            operation=operation,
-            downsample=downsample,
-            junction=junction,
-            preprocess=nn.Identity(),
-            postprocess=nn.Identity(),
-            downsample_before_block=False,
-            **kwargs)

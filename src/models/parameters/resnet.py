@@ -1,4 +1,4 @@
-from ..blocks import BasicBlock, PreActivationBlock
+from ..blocks import BaseBlock, ResNetBlock
 from ..classifiers import LinearClassifier
 from ..downsamples import AverageLinearDownsample, LinearDownsample
 from ..heads import NoneHead, PreActivationHead
@@ -30,7 +30,7 @@ def make_resnet_layers(depths, channels, groups, bottleneck):
 
 imagenet_params = dict(
     stem=LargeStem,
-    block=BasicBlock,
+    block=ResNetBlock,
     operation=BasicOperation,
     downsample=LinearDownsample,
     junction=AddJunction,
@@ -148,7 +148,7 @@ imagenet_models = {
 
 cifar_params = dict(
     stem=SmallStem,
-    block=BasicBlock,
+    block=ResNetBlock,
     operation=BasicOperation,
     downsample=LinearDownsample,
     junction=AddJunction,
@@ -181,7 +181,7 @@ cifar_models = {
         stem_channels=16, head_channels=640,
         stem=PreActSmallStem,
         head=PreActivationHead,
-        block=PreActivationBlock,
+        block=BaseBlock,
         operation=PreActivationBasicOperation),
 
     'WideResNet-40-k4': clone_params(
@@ -190,7 +190,7 @@ cifar_models = {
         stem_channels=16, head_channels=256,
         stem=PreActSmallStem,
         head=PreActivationHead,
-        block=PreActivationBlock,
+        block=BaseBlock,
         operation=PreActivationBasicOperation),
 
     'WideResNet-40-k10': clone_params(
@@ -199,7 +199,7 @@ cifar_models = {
         stem_channels=16, head_channels=640,
         stem=PreActSmallStem,
         head=PreActivationHead,
-        block=PreActivationBlock,
+        block=BaseBlock,
         operation=PreActivationBasicOperation),
 
     'ResNeXt-29-8x64d': clone_params(

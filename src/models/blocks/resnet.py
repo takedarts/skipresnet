@@ -1,10 +1,11 @@
+import torch.nn as nn
+
 from .base import BaseBlock
 
 
-class SwinBlock(BaseBlock):
+class ResNetBlock(BaseBlock):
     '''
-    Block class for Swin Transformers.
-    Downsample is performed before the main block.
+    Block class for ResNets.
     '''
 
     def __init__(
@@ -12,5 +13,5 @@ class SwinBlock(BaseBlock):
         **kwargs,
     ) -> None:
         super().__init__(
-            downsample_before_block=True,
+            postprocess=nn.ReLU(inplace=True),
             **kwargs)

@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Tuple
 
 import numpy as np
 
-from ..blocks import BasicBlock
+from ..blocks import ResNetBlock
 from ..classifiers import LinearClassifier
 from ..downsamples import LinearDownsample
 from ..heads import NoneHead
@@ -53,7 +53,7 @@ def make_regnet_layers(
 
 imagenet_params = dict(
     stem=MobileNetStem,
-    block=BasicBlock,
+    block=ResNetBlock,
     operation=RegnetOperation,
     downsample=LinearDownsample,
     junction=AddJunction,

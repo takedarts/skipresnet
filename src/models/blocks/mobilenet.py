@@ -4,10 +4,10 @@ import torch.nn as nn
 
 from ..downsamples import NoneDownsample
 from ..junctions import NoneJunction
-from .base import _Block
+from .base import BaseBlock
 
 
-class MobileNetBlock(_Block):
+class MobileNetBlock(BaseBlock):
     '''
     Block class for MobileNets and EfficientNets.
     '''

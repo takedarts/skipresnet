@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from ..blocks import PreActivationBlock
+from ..blocks import BaseBlock
 from ..classifiers import LinearClassifier
 from ..downsamples import NFDownsample
 from ..heads import NFHead
@@ -43,7 +43,7 @@ def make_nfnet_layers(depths, channels, groups, bottleneck, alpha):
 
 imagenet_params = dict(
     stem=NFNetStem,
-    block=PreActivationBlock,
+    block=BaseBlock,
     operation=NFOperation,
     downsample=NFDownsample,
     junction=AddJunction,
