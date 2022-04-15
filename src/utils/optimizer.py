@@ -32,33 +32,20 @@ def create_optimizer(
     **kwargs,
 ) -> optim.Optimizer:
     # Make parameter groups.
-    if train_layerlrdecay == 1.0:
+    if train_layerlrdecay != 1.0:
+        parameters = _create_layer_decayed_parameter_group(
+            model=model,
+            train_lr=train_lr,
+            train_wdecay=train_wdecay,
+            train_bdecay=train_bdecay,
+            train_layerlrdecay=train_layerlrdecay,
+        )
+    else:
         parameters = _create_parameter_group(
             modules=[model],
             train_lr=train_lr,
             train_wdecay=train_wdecay,
             train_bdecay=train_bdecay)
-    else:
-        parameters = _create_parameter_group(
-            modules=[model.head, model.classifier],
-            train_lr=train_lr,
-            train_wdecay=train_wdecay,
-            train_bdecay=train_bdecay)
-
-        for i, block in enumerate(model.blocks[::-1]):
-            parameters.extend(_create_parameter_group(
-                modules=[block],
-                train_lr=train_lr * train_layerlrdecay**(i + 1),
-                train_wdecay=train_wdecay,
-                train_bdecay=train_bdecay
-            ))
-
-        parameters.extend(_create_parameter_group(
-            modules=[model.stem],
-            train_lr=train_lr * train_layerlrdecay**(len(model.blocks) + 1),
-            train_wdecay=train_wdecay,
-            train_bdecay=train_bdecay
-        ))
 
     # Make the optimizer.
     if train_optim == 'sgd':
@@ -81,20 +68,81 @@ def create_optimizer(
         raise Exception('unsupported optimizer: {}'.format(train_optim))
 
 
+def _create_layer_decayed_parameter_group(
+    model: Model,
+    train_lr: float,
+    train_wdecay: float,
+    train_bdecay: bool,
+    train_layerlrdecay: float,
+) -> List[Dict[str, Any]]:
+    '''Create parameter groups when layer-wise learning decay is applied.
+    A argument `train_layerdecay` means the ratio of the learning rate for the
+    stem block to the learing rate for the classifier.
+
+    Args:
+        model: Model object
+        train_lr: Initial learning rate
+        train_wdecay: Weight decay
+        train_bdecay: True if weight decay is applied to biases
+        train_layerdecay: Layer-wise learning rate decay
+
+    Returns:
+        List of parameter groups
+    '''
+    decay = train_layerlrdecay ** (1 / (len(model.blocks) + 1))
+
+    parameters = _create_parameter_group(
+        modules=[model.head, model.classifier],
+        train_lr=train_lr,
+        train_wdecay=train_wdecay,
+        train_bdecay=train_bdecay)
+
+    for i, block in enumerate(model.blocks[::-1]):
+        parameters.extend(_create_parameter_group(
+            modules=[block],
+            train_lr=train_lr * decay**(i + 1),
+            train_wdecay=train_wdecay,
+            train_bdecay=train_bdecay
+        ))
+
+    parameters.extend(_create_parameter_group(
+        modules=[model.stem],
+        train_lr=train_lr * decay**(len(model.blocks) + 1),
+        train_wdecay=train_wdecay,
+        train_bdecay=train_bdecay
+    ))
+
+    return parameters
+
+
 def _create_parameter_group(
     modules: List[nn.Module],
     train_lr: float,
     train_wdecay: float,
     train_bdecay: bool,
 ) -> List[Dict[str, Any]]:
-    # Make a parameter group which contains all parameters.
+    '''Create parameter groups.
+
+    Args:
+        modules: List of target modules
+        train_lr: Initial learning rate
+        train_wdecay: Weight decay
+        train_bdecay: True if weight decay is applied to biases
+
+    Returns:
+        List of parameter groups
+    '''
+
+    # If weight decay is applied to all parameters,
+    # a parameter group which contains all parameters is created.
     if train_bdecay:
         params: List[nn.Parameter] = []
         for module in modules:
             params.extend(p for p in module.parameters() if p.requires_grad)
         return [dict(params=params, lr=train_lr, weight_decay=train_wdecay)]
 
-    # Make two parameter groups:
+    # If weight decay is not applied to nomalizations and biases,
+    # following two parameter groups are created:
     # nodecay_group: parameters which are updated without weight decay.
     # decay_group: parameters which are updated with weight decay.
     # A parameter `relative_position_bias_table` in WindowAttention is

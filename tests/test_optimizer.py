@@ -50,9 +50,10 @@ def _test_optimizer(
 ) -> None:
     # Make a list of valid settings.
     parameters: Dict[int, Tuple[str, float, float]] = {}
+    decay = layerlrdecay**(1 / (len(model.blocks) + 1))
 
     parameters.update(
-        {k: (n, layerlrdecay**(len(model.blocks) + 1), d)
+        {k: (n, decay**(len(model.blocks) + 1), d)
          for k, n, d
          in _collect_parameters(model.stem, 'stem', bdecay)})
     parameters.update(
@@ -66,7 +67,7 @@ def _test_optimizer(
 
     for i, block in enumerate(model.blocks):
         parameters.update(
-            {k: (n, layerlrdecay**(len(model.blocks) - i), d)
+            {k: (n, decay**(len(model.blocks) - i), d)
              for k, n, d
              in _collect_parameters(block, f'blocks.{i}', bdecay)})
 
