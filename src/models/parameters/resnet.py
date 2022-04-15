@@ -4,9 +4,9 @@ from ..downsamples import AverageLinearDownsample, LinearDownsample
 from ..heads import NoneHead, PreActivationHead
 from ..junctions import AddJunction
 from ..loaders import load_resnet_parameters, load_resnetd_parameters
-from ..operations import (BasicOperation, BottleneckOperation,
-                          PreActivationBasicOperation)
+from ..operations import ResNetOperation
 from ..stems import DeepLargeStem, LargeStem, PreActSmallStem, SmallStem
+import functools
 
 
 def clone_params(params, **kwargs):
@@ -31,7 +31,6 @@ def make_resnet_layers(depths, channels, groups, bottleneck):
 imagenet_params = dict(
     stem=LargeStem,
     block=ResNetBlock,
-    operation=BasicOperation,
     downsample=LinearDownsample,
     junction=AddJunction,
     head=NoneHead,
@@ -43,6 +42,8 @@ imagenet_models = {
         imagenet_params,
         layers=make_resnet_layers([2, 2, 2, 2], 64, 1, 1),
         stem_channels=64, head_channels=512,
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='basic'),
         timm_name='resnet18',
         timm_loader=load_resnet_parameters),
 
@@ -50,6 +51,8 @@ imagenet_models = {
         imagenet_params,
         layers=make_resnet_layers([3, 4, 6, 3], 64, 1, 1),
         stem_channels=64, head_channels=512,
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='basic'),
         timm_name='resnet34',
         timm_loader=load_resnet_parameters),
 
@@ -57,7 +60,8 @@ imagenet_models = {
         imagenet_params,
         layers=make_resnet_layers([3, 4, 6, 3], 64, 1, 4),
         stem_channels=64, head_channels=2048,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnet50',
         timm_loader=load_resnet_parameters),
 
@@ -65,7 +69,8 @@ imagenet_models = {
         imagenet_params,
         layers=make_resnet_layers([3, 4, 23, 3], 64, 1, 4),
         stem_channels=64, head_channels=2048,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnet101',
         timm_loader=load_resnet_parameters),
 
@@ -73,7 +78,8 @@ imagenet_models = {
         imagenet_params,
         layers=make_resnet_layers([3, 8, 36, 3], 64, 1, 4),
         stem_channels=64, head_channels=2048,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnet152',
         timm_loader=load_resnet_parameters),
 
@@ -82,6 +88,8 @@ imagenet_models = {
         layers=make_resnet_layers([3, 4, 6, 3], 64, 1, 1),
         stem_channels=64, head_channels=512, semodule=True,
         semodule_reduction=16, semodule_divisor=8,
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='basic'),
         timm_loader=load_resnet_parameters),
 
     'SE-ResNet-50': clone_params(
@@ -89,7 +97,8 @@ imagenet_models = {
         layers=make_resnet_layers([3, 4, 6, 3], 64, 1, 4),
         stem_channels=64, head_channels=2048, semodule=True,
         semodule_reduction=16, semodule_divisor=8,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='seresnet50',
         timm_loader=load_resnet_parameters),
 
@@ -97,7 +106,8 @@ imagenet_models = {
         imagenet_params,
         layers=make_resnet_layers([3, 4, 6, 3], 4, 32, 64),
         stem_channels=64, head_channels=2048,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnext50_32x4d',
         timm_loader=load_resnet_parameters),
 
@@ -105,7 +115,8 @@ imagenet_models = {
         imagenet_params,
         layers=make_resnet_layers([3, 4, 23, 3], 4, 32, 64),
         stem_channels=64, head_channels=2048,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnext101_32x4d',
         timm_loader=load_resnet_parameters),
 
@@ -113,7 +124,8 @@ imagenet_models = {
         imagenet_params,
         layers=make_resnet_layers([3, 4, 23, 3], 8, 32, 32),
         stem_channels=64, head_channels=2048,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnext101_32x8d',
         timm_loader=load_resnet_parameters),
 
@@ -122,7 +134,8 @@ imagenet_models = {
         layers=make_resnet_layers([3, 4, 6, 3], 64, 1, 4),
         stem_channels=64, head_channels=2048,
         stem=DeepLargeStem, downsample=AverageLinearDownsample,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnet50d',
         timm_loader=load_resnetd_parameters),
 
@@ -131,7 +144,8 @@ imagenet_models = {
         layers=make_resnet_layers([3, 4, 23, 3], 64, 1, 4),
         stem_channels=64, head_channels=2048,
         stem=DeepLargeStem, downsample=AverageLinearDownsample,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnet101d',
         timm_loader=load_resnetd_parameters),
 
@@ -140,7 +154,8 @@ imagenet_models = {
         layers=make_resnet_layers([3, 8, 36, 3], 64, 1, 4),
         stem_channels=64, head_channels=2048,
         stem=DeepLargeStem, downsample=AverageLinearDownsample,
-        operation=BottleneckOperation,
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnet152d',
         timm_loader=load_resnetd_parameters),
 }
@@ -149,7 +164,6 @@ imagenet_models = {
 cifar_params = dict(
     stem=SmallStem,
     block=ResNetBlock,
-    operation=BasicOperation,
     downsample=LinearDownsample,
     junction=AddJunction,
     head=NoneHead,
@@ -161,19 +175,25 @@ cifar_models = {
         cifar_params,
         layers=make_resnet_layers([18, 18, 18], 16, 1, 1),
         stem_channels=16, head_channels=64,
-        gate_reduction=2),
+        gate_reduction=2,
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='basic')),
 
     'ResNet-200': clone_params(
         cifar_params,
         layers=make_resnet_layers([33, 33, 33], 16, 1, 1),
         stem_channels=16, head_channels=64,
-        gate_reduction=2),
+        gate_reduction=2,
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='basic')),
 
     'SE-ResNet-110': clone_params(
         cifar_params,
         layers=make_resnet_layers([18, 18, 18], 16, 1, 1),
         stem_channels=16, head_channels=64, semodule=True,
-        gate_reduction=2),
+        gate_reduction=2,
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='basic')),
 
     'WideResNet-28-k10': clone_params(
         cifar_params,
@@ -182,7 +202,8 @@ cifar_models = {
         stem=PreActSmallStem,
         head=PreActivationHead,
         block=BaseBlock,
-        operation=PreActivationBasicOperation),
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='preact')),
 
     'WideResNet-40-k4': clone_params(
         cifar_params,
@@ -191,7 +212,8 @@ cifar_models = {
         stem=PreActSmallStem,
         head=PreActivationHead,
         block=BaseBlock,
-        operation=PreActivationBasicOperation),
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='preact')),
 
     'WideResNet-40-k10': clone_params(
         cifar_params,
@@ -200,17 +222,20 @@ cifar_models = {
         stem=PreActSmallStem,
         head=PreActivationHead,
         block=BaseBlock,
-        operation=PreActivationBasicOperation),
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='preact')),
 
     'ResNeXt-29-8x64d': clone_params(
         cifar_params,
         layers=make_resnet_layers([3, 3, 3], 64, 8, 4),
         stem_channels=64, head_channels=1024,
-        operation=BottleneckOperation),
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic')),
 
     'ResNeXt-47-32x4d': clone_params(
         cifar_params,
         layers=make_resnet_layers([5, 5, 5], 4, 32, 64),
         stem_channels=16, head_channels=1024,
-        operation=BottleneckOperation),
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='basic')),
 }

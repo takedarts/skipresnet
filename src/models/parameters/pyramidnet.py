@@ -1,3 +1,4 @@
+import functools
 import itertools
 from typing import Any, Dict, List, Tuple
 
@@ -6,8 +7,7 @@ from ..classifiers import LinearClassifier
 from ..downsamples import AverageDownsample
 from ..heads import PreActivationHead
 from ..junctions import AddJunction
-from ..operations import (SingleActivationBasicOperation,
-                          SingleActivationBottleneckOperation)
+from ..operations import ResNetOperation
 from ..stems import PreActSmallStem
 
 
@@ -40,7 +40,6 @@ def make_pyramid_layers(
 cifar_params = dict(
     stem=PreActSmallStem,
     block=BaseBlock,
-    operation=SingleActivationBasicOperation,
     downsample=AverageDownsample,
     junction=AddJunction,
     head=PreActivationHead,
@@ -51,22 +50,28 @@ cifar_models = {
     'PyramidNet-110-a48': clone_params(
         cifar_params,
         layers=make_pyramid_layers([18, 18, 18], 16, 48, 1, 1),
-        stem_channels=16, head_channels=64),
+        stem_channels=16, head_channels=64,
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='preact')),
 
     'PyramidNet-110-a270': clone_params(
         cifar_params,
         layers=make_pyramid_layers([18, 18, 18], 16, 270, 1, 1),
-        stem_channels=16, head_channels=286),
+        stem_channels=16, head_channels=286,
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='preact')),
 
     'PyramidNet-200-a240': clone_params(
         cifar_params,
         layers=make_pyramid_layers([22, 22, 22], 16, 240, 1, 4),
         stem_channels=16, head_channels=1024,
-        operation=SingleActivationBottleneckOperation),
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='preact')),
 
     'PyramidNet-272-a200': clone_params(
         cifar_params,
         layers=make_pyramid_layers([30, 30, 30], 16, 200, 1, 4),
         stem_channels=16, head_channels=864,
-        operation=SingleActivationBottleneckOperation),
+        operation=functools.partial(
+            ResNetOperation, block_type='bottleneck', layer_type='preact')),
 }
