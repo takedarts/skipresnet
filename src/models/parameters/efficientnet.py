@@ -245,22 +245,22 @@ imagenet_models = {
 }
 
 imagenet_models.update({
-    'EfficientNetV2-S-22k': clone_params(
+    'EfficientNetV2-S-21k': clone_params(
         imagenet_models['EfficientNetV2-S'],
         timm_name='tf_efficientnetv2_s_in21k',
     ),
 
-    'EfficientNetV2-M-22k': clone_params(
+    'EfficientNetV2-M-21k': clone_params(
         imagenet_models['EfficientNetV2-M'],
         timm_name='tf_efficientnetv2_m_in21k',
     ),
 
-    'EfficientNetV2-L-22k': clone_params(
+    'EfficientNetV2-L-21k': clone_params(
         imagenet_models['EfficientNetV2-L'],
         timm_name='tf_efficientnetv2_l_in21k',
     ),
 
-    'EfficientNetV2-XL-22k': clone_params(
+    'EfficientNetV2-XL-21k': clone_params(
         imagenet_params,
         layers=make_efficientnetv2_xl_layers(divisor=8),
         stem_channels=32, head_channels=1280,
