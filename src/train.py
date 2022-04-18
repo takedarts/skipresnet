@@ -27,7 +27,7 @@ from datasets import (create_train_dataloader, create_valid_dataloader,
 from models import create_model
 from models.modules import DropBlock
 from utils import (Config, create_optimizer, create_scheduler, setup_logging,
-                   setup_random_seed)
+                   setup_progressbar, setup_random_seed)
 
 try:
     import torch_xla.core.xla_model as xm  # type:ignore
@@ -652,8 +652,9 @@ def train_model(
 
 def main() -> None:
     args = parse_args()
-    setup_logging(args.debug)
-    setup_random_seed(args.seed)
+    setup_logging(debug=args.debug)
+    setup_random_seed(seed=args.seed)
+    setup_progressbar(enabled=args.progress_step != 0)
 
     config = Config(args.config)
     log_name = f'{config.dataset}/{config.model}'
