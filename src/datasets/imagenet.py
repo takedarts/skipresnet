@@ -253,8 +253,13 @@ def ImagenetDataset(
             Lighting(**lightning),
             torchvision.transforms.Normalize(mean=mean, std=std)]
     else:
+        if crop_size < 384:
+            resize_size = round(crop_size / 0.875)
+        else:
+            resize_size = crop_size
+
         transforms = [
-            torchvision.transforms.Resize(round(crop_size / 224 * 256)),
+            torchvision.transforms.Resize(resize_size),
             torchvision.transforms.CenterCrop(crop_size),
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize(mean=mean, std=std)]
