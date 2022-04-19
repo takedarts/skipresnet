@@ -1,3 +1,7 @@
+**NOTE:**
+This is an implementation of SkipResNets for performance evaluation.
+If you would like use SkipResNets for your tasks, see [SkipResNet reference implementation](https://github.com/takedarts/skipresnet-reference) where SkipResNet models are implemented as models for PyTorch Image Models (timm).
+
 # What is SkipResNet ?
 
 [<img alt="Architecture of DenseResNets" src="res/architecture.png" width="250px" align="right">](res/architecture.png)
