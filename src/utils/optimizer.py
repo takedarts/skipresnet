@@ -23,7 +23,7 @@ def create_optimizer(
     model: Model,
     train_optim: str,
     train_lr: float,
-    train_layerlrdecay: float,
+    train_layerlr_ratio: float,
     train_momentum: float,
     train_eps: float,
     train_alpha: float,
@@ -32,13 +32,13 @@ def create_optimizer(
     **kwargs,
 ) -> optim.Optimizer:
     # Make parameter groups.
-    if train_layerlrdecay != 1.0:
+    if train_layerlr_ratio != 1.0:
         parameters = _create_layer_decayed_parameter_group(
             model=model,
             train_lr=train_lr,
             train_wdecay=train_wdecay,
             train_bdecay=train_bdecay,
-            train_layerlrdecay=train_layerlrdecay,
+            train_layerlr_ratio=train_layerlr_ratio,
         )
     else:
         parameters = _create_parameter_group(
@@ -49,6 +49,8 @@ def create_optimizer(
 
     # Make the optimizer.
     if train_optim == 'sgd':
+        print(optim.SGD(
+            parameters, lr=train_lr, momentum=train_momentum, nesterov=True))
         return optim.SGD(
             parameters, lr=train_lr, momentum=train_momentum, nesterov=True)
     elif train_optim == 'adamw':
@@ -73,7 +75,7 @@ def _create_layer_decayed_parameter_group(
     train_lr: float,
     train_wdecay: float,
     train_bdecay: bool,
-    train_layerlrdecay: float,
+    train_layerlr_ratio: float,
 ) -> List[Dict[str, Any]]:
     '''Create parameter groups when layer-wise learning decay is applied.
     A argument `train_layerdecay` means the ratio of the learning rate for the
@@ -84,12 +86,12 @@ def _create_layer_decayed_parameter_group(
         train_lr: Initial learning rate
         train_wdecay: Weight decay
         train_bdecay: True if weight decay is applied to biases
-        train_layerdecay: Layer-wise learning rate decay
+        train_layerlr_ratio: Input/Output LR ratio of Layer-wise learning rate decay
 
     Returns:
         List of parameter groups
     '''
-    decay = train_layerlrdecay ** (1 / (len(model.blocks) + 1))
+    decay = train_layerlr_ratio**(1 / (len(model.blocks) + 1))
 
     parameters = _create_parameter_group(
         modules=[model.head, model.classifier],
