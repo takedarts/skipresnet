@@ -1,10 +1,11 @@
-from .convnext import ConvNeXtOperation
-from .densenet import DenseNetOperation
-from .efficientnet import EfficientNetOperation
-from .mobilenet import MobileNetOperation
-from .nfnet import NFOperation
-from .regnet import RegnetOperation
-from .resnet import ResNetOperation
-from .split_attention import SplitAttentionModule, SplitAttentionOperation
-from .swin import SwinOperation
-from .vit import ViTOperation
+from .convnext import ConvNeXtOperation  # noqa
+from .densenet import DenseNetOperation  # noqa
+from .efficientnet import EfficientNetOperation  # noqa
+from .mobilenet import MobileNetOperation  # noqa
+from .nfnet import NFOperation  # noqa
+from .regnet import RegnetOperation  # noqa
+from .resnet import ResNetOperation  # noqa
+from .split_attention import SplitAttentionOperation  # noqa
+from .swin import SwinOperation  # noqa
+from .tresnet import TResNetOperation  # noqa
+from .vit import ViTOperation  # noqa

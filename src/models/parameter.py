@@ -74,6 +74,7 @@ imagenet_base_models.update(parameters.nfnet.imagenet_models)
 imagenet_base_models.update(parameters.swin.imagenet_models)
 imagenet_base_models.update(parameters.vit.imagenet_models)
 imagenet_base_models.update(parameters.convnext.imagenet_models)
+imagenet_base_models.update(parameters.tresnet.imagenet_models)
 
 cifar_base_models: Dict[str, Any] = {}
 cifar_base_models.update(parameters.resnet.cifar_models)

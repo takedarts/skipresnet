@@ -1,2 +1,2 @@
-from . import (convnext, densenet, efficientnet, mobilenet, nfnet, pyramidnet,
-               regnet, resnest, resnet, swin, vit)
+from . import (convnext, densenet, efficientnet, mobilenet, nfnet,  # noqa
+               pyramidnet, regnet, resnest, resnet, swin, tresnet, vit)

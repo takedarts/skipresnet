@@ -79,6 +79,11 @@ PRETRAINED_MODEL_NAMES: List[Tuple[str, str, int]] = [
     ('ConvNeXt-S', 'convnext_small', 224),
     ('ConvNeXt-B', 'convnext_base', 224),
     ('ConvNeXt-L', 'convnext_large', 224),
+
+    # TResNets
+    ('TResNet-M', 'tresnet_m', 224),
+    ('TResNet-L', 'tresnet_l', 224),
+    ('TResNet-XL', 'tresnet_xl', 224),
 ]
 
 
@@ -88,7 +93,7 @@ RANDOM_MODEL_NAMES = [
     ('ResNeXt-101-32x4d', 'resnext101_32x4d', 224),
 
     # EfficientNets
-    ('EfficientNetV2-XL-22k', 'tf_efficientnetv2_xl_in21k', 224),
+    ('EfficientNetV2-XL-21k', 'tf_efficientnetv2_xl_in21k', 224),
 
     # ConvNeXts
     ('ConvNeXt-XL-22k', 'convnext_xlarge_in22k', 224),
