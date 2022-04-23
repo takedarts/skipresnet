@@ -31,26 +31,26 @@ NORM_CLASSES = (
 
 
 @pytest.mark.parametrize(
-    'model_name,layerlrdecay,bdecay',
+    'model_name,layerlr_ratio,bdecay',
     TEST_PARAMETERS,
     ids=[f'{n}-{d}-{b}' for n, d, b in TEST_PARAMETERS]
 )
-def test_optimizer(model_name: str, layerlrdecay: float, bdecay: bool) -> None:
+def test_optimizer(model_name: str, layerlr_ratio: float, bdecay: bool) -> None:
     _test_optimizer(
         model=models.create_model(model_name, 'imagenet'),
-        layerlrdecay=layerlrdecay,
+        layerlr_ratio=layerlr_ratio,
         bdecay=bdecay,
     )
 
 
 def _test_optimizer(
     model: models.Model,
-    layerlrdecay: float,
+    layerlr_ratio: float,
     bdecay: bool,
 ) -> None:
     # Make a list of valid settings.
     parameters: Dict[int, Tuple[str, float, float]] = {}
-    decay = layerlrdecay**(1 / (len(model.blocks) + 1))
+    decay = layerlr_ratio**(1 / (len(model.blocks) + 1))
 
     parameters.update(
         {k: (n, decay**(len(model.blocks) + 1), d)
@@ -81,11 +81,11 @@ def _test_optimizer(
         train_alpha=0.99,
         train_wdecay=0.1,
         train_bdecay=bdecay,
-        train_layerlrdecay=layerlrdecay,
+        train_layerlr_ratio=layerlr_ratio,
     )
 
     # Assert the number of parameter groups.
-    if layerlrdecay == 1.0:
+    if layerlr_ratio == 1.0:
         num_of_groups = 1
     else:
         num_of_groups = len(model.blocks) + 2
