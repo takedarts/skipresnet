@@ -49,8 +49,6 @@ def create_optimizer(
 
     # Make the optimizer.
     if train_optim == 'sgd':
-        print(optim.SGD(
-            parameters, lr=train_lr, momentum=train_momentum, nesterov=True))
         return optim.SGD(
             parameters, lr=train_lr, momentum=train_momentum, nesterov=True)
     elif train_optim == 'adamw':
