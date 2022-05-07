@@ -140,7 +140,7 @@ imagenet_models.update({
 
     'SwinBasePatch4-384-22k': clone_params(
         imagenet_models['SwinBasePatch4-384'],
-        timm_name='swin_base_patch4_window7_384_in22k',
+        timm_name='swin_base_patch4_window12_384_in22k',
     ),
 
     'SwinLargePatch4-224-22k': clone_params(
@@ -150,6 +150,6 @@ imagenet_models.update({
 
     'SwinLargePatch4-384-22k': clone_params(
         imagenet_models['SwinLargePatch4-384'],
-        timm_name='swin_large_patch4_window7_384_in22k',
+        timm_name='swin_large_patch4_window12_384_in22k',
     ),
 })
