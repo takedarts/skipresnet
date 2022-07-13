@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 import torch
 import torch.nn as nn
@@ -136,10 +136,19 @@ def _create_parameter_group(
     # If weight decay is applied to all parameters,
     # a parameter group which contains all parameters is created.
     if train_bdecay:
-        params: List[nn.Parameter] = []
+        params: List[Tuple[str, nn.Parameter]] = []
         for module in modules:
-            params.extend(p for p in module.parameters() if p.requires_grad)
-        return [dict(params=params, lr=train_lr, weight_decay=train_wdecay)]
+            for name, param in module.named_parameters():
+                params.append((name, param))
+
+        return [
+            dict(
+                params=[p for _, p in params],
+                names=[n for n, _ in params],
+                lr=train_lr,
+                weight_decay=train_wdecay
+            ),
+        ]
 
     # If weight decay is not applied to nomalizations and biases,
     # following two parameter groups are created:
@@ -147,8 +156,8 @@ def _create_parameter_group(
     # decay_group: parameters which are updated with weight decay.
     # A parameter `relative_position_bias_table` in WindowAttention is
     # considered a bias parameter.
-    nodecay_group: List[nn.Parameter] = []
-    decay_group: List[nn.Parameter] = []
+    nodecay_group: List[Tuple[str, nn.Parameter]] = []
+    decay_group: List[Tuple[str, nn.Parameter]] = []
 
     for module in modules:
         children = {n: m for n, m in module.named_modules()}
@@ -164,14 +173,24 @@ def _create_parameter_group(
                 parent_name, param_name = '', name
 
             if (isinstance(children[parent_name], NORM_CLASSES)
-                    or param_name == 'bias'
+                    or param_name == 'bias' or param.dim() == 1
                     or (isinstance(children[parent_name], WindowAttention)
                         and param_name == 'relative_position_bias_table')):
-                nodecay_group.append(param)
+                nodecay_group.append((name, param))
             else:
-                decay_group.append(param)
+                decay_group.append((name, param))
 
     return [
-        dict(params=nodecay_group, lr=train_lr, weight_decay=0.0),
-        dict(params=decay_group, lr=train_lr, weight_decay=train_wdecay),
+        dict(
+            params=[p for _, p in nodecay_group],
+            names=[n for n, _ in nodecay_group],
+            lr=train_lr,
+            weight_decay=0.0,
+        ),
+        dict(
+            params=[p for _, p in decay_group],
+            names=[n for n, _ in decay_group],
+            lr=train_lr,
+            weight_decay=train_wdecay,
+        ),
     ]
