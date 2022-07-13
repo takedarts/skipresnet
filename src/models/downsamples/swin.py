@@ -2,6 +2,7 @@ from typing import Callable
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class SwinDownsample(nn.Module):
@@ -34,6 +35,13 @@ class SwinDownsample(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if not self.enabled:
             return x
+
+        _, _, size_h, size_w = x.shape
+        pad_h = (self.stride - size_h % self.stride) % self.stride
+        pad_w = (self.stride - size_w % self.stride) % self.stride
+
+        if pad_h != 0 or pad_w != 0:
+            x = F.pad(x, (0, pad_w, 0, pad_h))
 
         x = x.reshape(*x.shape[:2], -1, self.stride, x.shape[3])
         x = x.reshape(*x.shape[:4], -1, self.stride)

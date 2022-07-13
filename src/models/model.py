@@ -65,6 +65,21 @@ class Model(nn.Module):
         if pretrained:
             self.load_pretrained_parameters()
 
+    def convert_to_backbone(self) -> None:
+        '''Remove modules not required for the backbone model.
+        '''
+        if hasattr(self, 'head'):
+            del self.head
+
+        if hasattr(self, 'classifier'):
+            del self.classifier
+
+        for module in self.modules():
+            if (module is not self
+                    and hasattr(module, 'convert_to_backbone')
+                    and callable(module.convert_to_backbone)):
+                module.convert_to_backbone()
+
     def get_features(
         self,
         x: torch.Tensor,

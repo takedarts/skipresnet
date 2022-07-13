@@ -1,9 +1,11 @@
-from typing import Callable, Optional, Tuple
 import itertools
-import torch
-import torch.nn as nn
 import math
 import warnings
+from typing import Callable, Optional, Tuple
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 
 @torch.no_grad()
@@ -124,7 +126,8 @@ class WindowAttention(nn.Module):
         relative_position_bias = relative_position_bias.view(
             self.window_size[0] * self.window_size[1],
             self.window_size[0] * self.window_size[1], -1)  # Wh*Ww,Wh*Ww,nH
-        relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous()  # nH, Wh*Ww, Wh*Ww
+        relative_position_bias = relative_position_bias.permute(
+            2, 0, 1).contiguous()  # nH, Wh*Ww, Wh*Ww
         attn = attn + relative_position_bias.unsqueeze(0)
 
         if mask is not None:
@@ -208,6 +211,9 @@ class SwinOperation(nn.Module):
         else:
             self.register_buffer("attn_mask", None, persistent=False)
 
+    def convert_to_backbone(self) -> None:
+        self.attn_mask = None
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.attn_op:  # attention
             return self.forward_attn(x)
@@ -215,6 +221,13 @@ class SwinOperation(nn.Module):
             return self.forward_mlp(x)
 
     def forward_attn(self, x: torch.Tensor) -> torch.Tensor:
+        _, _, org_h, org_w = x.shape
+        pad_h = (self.window_size - org_h % self.window_size) % self.window_size
+        pad_w = (self.window_size - org_w % self.window_size) % self.window_size
+
+        if pad_h != 0 or pad_w != 0:
+            x = F.pad(x, (0, pad_w, 0, pad_h))
+
         size_b, size_c, size_h, size_w = x.shape
         x = x.permute(0, 2, 3, 1).reshape(size_b, -1, size_c)
 
@@ -254,7 +267,7 @@ class SwinOperation(nn.Module):
 
         x = x.permute(0, 3, 1, 2)
 
-        return x
+        return x[:, :, :org_h, :org_w]
 
     def forward_mlp(self, x: torch.Tensor) -> torch.Tensor:
         size = x.shape[:]
