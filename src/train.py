@@ -573,14 +573,18 @@ def create_trainer(
 
     # gpu/tpu
     if gpus is not None:
+        gpu_cores = len(gpus) if isinstance(gpus, list) else gpus
         parameters['gpus'] = gpus
         parameters['deterministic'] = True
         parameters['benchmark'] = True
         parameters['precision'] = precision
-        parameters['strategy'] = plp.DDPPlugin(find_unused_parameters=False)
+        parameters['strategy'] = plp.DDPPlugin(
+            find_unused_parameters=gpu_cores > 1)
     elif tpus is not None:
+        tpu_cores = len(tpus) if isinstance(tpus, list) else tpus
         parameters['tpu_cores'] = tpus
-        parameters['strategy'] = plp.TPUSpawnPlugin(find_unused_parameters=False)
+        parameters['strategy'] = plp.TPUSpawnPlugin(
+            find_unused_parameters=tpu_cores > 1)
         if precision == 16:
             parameters['precision'] = 'bf16'
             parameters['plugins'] = [TPUBf16PrecisionPlugin()]
