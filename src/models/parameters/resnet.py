@@ -83,25 +83,6 @@ imagenet_models = {
         timm_name='resnet152',
         timm_loader=load_resnet_parameters),
 
-    'SE-ResNet-34': clone_params(
-        imagenet_params,
-        layers=make_resnet_layers([3, 4, 6, 3], 64, 1, 1),
-        stem_channels=64, head_channels=512, semodule=True,
-        semodule_reduction=16, semodule_divisor=8,
-        operation=functools.partial(
-            ResNetOperation, block_type='basic', layer_type='basic'),
-        timm_loader=load_resnet_parameters),
-
-    'SE-ResNet-50': clone_params(
-        imagenet_params,
-        layers=make_resnet_layers([3, 4, 6, 3], 64, 1, 4),
-        stem_channels=64, head_channels=2048, semodule=True,
-        semodule_reduction=16, semodule_divisor=8,
-        operation=functools.partial(
-            ResNetOperation, block_type='bottleneck', layer_type='basic'),
-        timm_name='seresnet50',
-        timm_loader=load_resnet_parameters),
-
     'ResNeXt-50-32x4d': clone_params(
         imagenet_params,
         layers=make_resnet_layers([3, 4, 6, 3], 4, 32, 64),
@@ -158,8 +139,48 @@ imagenet_models = {
             ResNetOperation, block_type='bottleneck', layer_type='basic'),
         timm_name='resnet152d',
         timm_loader=load_resnetd_parameters),
+
+    'SE-ResNet-34': clone_params(
+        imagenet_params,
+        layers=make_resnet_layers([3, 4, 6, 3], 64, 1, 1),
+        stem_channels=64, head_channels=512, semodule=True,
+        semodule_reduction=16, semodule_divisor=8,
+        operation=functools.partial(
+            ResNetOperation, block_type='basic', layer_type='basic'),
+        timm_loader=load_resnet_parameters),
 }
 
+imagenet_models.update({
+    'SE-ResNet-50': clone_params(
+        imagenet_models['ResNet-50'],
+        semodule=True, semodule_reduction=16, semodule_divisor=8,
+        timm_name='seresnet50'),
+
+    'SE-ResNet-101': clone_params(
+        imagenet_models['ResNet-101'],
+        semodule=True, semodule_reduction=16, semodule_divisor=8,
+        timm_name=None),
+
+    'SE-ResNet-152': clone_params(
+        imagenet_models['ResNet-152'],
+        semodule=True, semodule_reduction=16, semodule_divisor=8,
+        timm_name=None),
+
+    'SE-ResNeXt-50-32x4d': clone_params(
+        imagenet_models['ResNeXt-50-32x4d'],
+        semodule=True, semodule_reduction=16, semodule_divisor=8,
+        timm_name='seresnext50_32x4d'),
+
+    'SE-ResNeXt-101-32x4d': clone_params(
+        imagenet_models['ResNeXt-101-32x4d'],
+        semodule=True, semodule_reduction=16, semodule_divisor=8,
+        timm_name=None),
+
+    'SE-ResNeXt-101-32x8d': clone_params(
+        imagenet_models['ResNeXt-101-32x8d'],
+        semodule=True, semodule_reduction=16, semodule_divisor=8,
+        timm_name='seresnext101_32x8d'),
+})
 
 cifar_params = dict(
     stem=SmallStem,

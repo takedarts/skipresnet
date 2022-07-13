@@ -14,12 +14,14 @@ PRETRAINED_MODEL_NAMES: List[Tuple[str, str, int]] = [
     ('ResNet-50', 'resnet50', 224),
     ('ResNet-101', 'resnet101', 224),
     ('ResNet-152', 'resnet152', 224),
-    ('SE-ResNet-50', 'seresnet50', 224),
     ('ResNeXt-50-32x4d', 'resnext50_32x4d', 224),
     ('ResNeXt-101-32x8d', 'resnext101_32x8d', 224),
     ('ResNetD-50', 'resnet50d', 224),
     ('ResNetD-101', 'resnet101d', 224),
     ('ResNetD-152', 'resnet152d', 224),
+    ('SE-ResNet-50', 'seresnet50', 224),
+    ('SE-ResNeXt-50-32x4d', 'seresnext50_32x4d', 224),
+    ('SE-ResNeXt-101-32x8d', 'seresnext101_32x8d', 224),
 
     # ResNeSts
     ('ResNeSt-50-2s1x64d', 'resnest50d', 224),
@@ -89,8 +91,11 @@ PRETRAINED_MODEL_NAMES: List[Tuple[str, str, int]] = [
 
 RANDOM_MODEL_NAMES = [
     # ResNets
-    ('SE-ResNet-34', 'seresnet34', 224),
     ('ResNeXt-101-32x4d', 'resnext101_32x4d', 224),
+    ('SE-ResNet-34', 'seresnet34', 224),
+    ('SE-ResNet-101', 'seresnet101', 224),
+    ('SE-ResNet-152', 'seresnet152', 224),
+    ('SE-ResNeXt-101-32x4d', 'seresnext101_32x4d', 224),
 
     # EfficientNets
     ('EfficientNetV2-XL-21k', 'tf_efficientnetv2_xl_in21k', 224),
