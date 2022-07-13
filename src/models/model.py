@@ -170,6 +170,7 @@ def create_model(
         stochdepth_prob=0.0,
         signalaugment=0.0,
         pretrained=False,
+        use_checkpoint=False,
     )
 
     # Apply the model speficied parameters.
@@ -203,7 +204,10 @@ def create_model(
     return Model(**model_params)  # type:ignore
 
 
-def create_model_from_checkpoint(checkpoint: Dict[str, Any]) -> 'Model':
+def create_model_from_checkpoint(
+    checkpoint: Dict[str, Any],
+    **kwargs,
+) -> 'Model':
     '''Build a model with the parameters loaded from a checkpoint file.
     Args:
         checkpoint: Parameters loaded from a checkpoint file.
@@ -218,7 +222,7 @@ def create_model_from_checkpoint(checkpoint: Dict[str, Any]) -> 'Model':
     state_dict = checkpoint['state_dict']
     state_dict = {k[6:]: v for k, v in state_dict.items() if k[:6] == 'model.'}
 
-    model = create_model(model_name, dataset_name, **parameters)
+    model = create_model(model_name, dataset_name, **parameters, **kwargs)
     model.load_state_dict(state_dict)
 
     return model

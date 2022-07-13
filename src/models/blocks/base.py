@@ -3,6 +3,7 @@ from typing import Callable, List, Tuple
 
 import torch
 import torch.nn as nn
+from torch.utils.checkpoint import checkpoint
 
 from ..modules import ShakeDrop, SignalAugmentation, StochasticDepth
 
@@ -24,6 +25,7 @@ class BaseBlock(nn.Module):
         preprocess: nn.Module = nn.Identity(),
         postprocess: nn.Module = nn.Identity(),
         downsample_before_block: bool = False,
+        use_checkpoint: bool = False,
         **kwargs
     ) -> None:
         super().__init__()
@@ -72,6 +74,9 @@ class BaseBlock(nn.Module):
         # process after a block
         self.postprocess = postprocess
 
+        # if True, checkpoint is used to reduce memory consumption.
+        self.use_checkpoint = use_checkpoint
+
     def forward(self, x: List[torch.Tensor]) -> List[torch.Tensor]:
         # preprocess
         x[-1] = self.preprocess(x[-1])
@@ -80,10 +85,12 @@ class BaseBlock(nn.Module):
         z = self.downsample(x[-1])
 
         # layers
-        if self.downsample_before_block:
-            y = self.operation(z)
+        arg = z if self.downsample_before_block else x[-1]
+
+        if self.use_checkpoint:
+            y = checkpoint(self.operation, arg)
         else:
-            y = self.operation(x[-1])
+            y = self.operation(arg)
 
         # noise
         y = self.noise(y)
