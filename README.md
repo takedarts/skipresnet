@@ -118,5 +118,23 @@ Following models are trainied using the CIFAR-10/100 dataset from scratch. No ex
 |WideResNet-28-k10<sub>(5)</sub><br>Skip-WideResNet-28-k10<sub>(5)</sub>|0.9787<br>0.9780|0.8425<br>0.8508|
 |WideResNet-40-k10<sub>(5)</sub><br>Skip-WideResNet-40-k10<sub>(5)</sub>|0.9793<br>0.9792|0.8439<br>0.8498|
 
+## Performances of backbone models in downstream tasks.
+
+### Results on the MS-COCO dataset (Instance Segmentation)
+|Model|Backbone|mAP<sup>box<sup>|mAP<sup>seg<sup>|
+|:---|:---|:---:|:---:|
+|Cascade<br>Mask RCNN|ResNet-50<br>Skip-ResNet-50|0.44806<br>0.47716|0.38977<br>0.41421|
+|Cascade<br>Mask RCNN|ResNet-101<br>Skip-ResNet-101|0.44813<br>0.48224|0.38817<br>0.42012|
+|Cascade<br>Mask RCNN|ResNeXt-50-32x4d<br>Skip-ResNeXt-50-32x4d|0.45450<br>0.47445|0.39470<br>0.41304|
+|Cascade<br>Mask RCNN|ResNeXt-101-32x4d<br>Skip-ResNeXt-101-32x4d|0.46085<br>0.48862|0.39817<br>0.42241|
+
+### Results on the ADE20k dataset (Semantic Segmentation)
+|Model|Backbone|aAcc|mIoU|
+|:---|:---|:---:|:---:|
+|UPerNet<br>&nbsp;|ResNet-50<br>Skip-ResNet-50|0.8019<br>0.8016|0.4194<br>0.4244|
+|UPerNet<br>&nbsp;|ResNet-101<br>Skip-ResNet-101|0.8101<br>0.8138|0.4402<br>0.4443|
+|UPerNet<br>&nbsp;|ResNeXt-50-32x4d<br>Skip-ResNeXt-50-32x4d|0.8036<br>0.8074|0.4269<br>0.4339|
+|UPerNet<br>&nbsp;|ResNeXt-101-32x4d<br>Skip-ResNeXt-101-32x4d|0.8114<br>0.8185|0.4407<br>0.4565|
+
 # Acknowledgement
 This work is supported by JSPS KAKENHI Grant Number JP20K11871, and a part of this experiment is supported by the TPU Research Cloud program.
