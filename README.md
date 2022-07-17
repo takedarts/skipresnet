@@ -57,41 +57,49 @@ Following models are trainied using the ImageNet-1k dataset from scratch. The im
 |Model|# of params|flops (224x224)|settings|
 |:---|:---:|:---:|:---|
 |ResNet-34<br>Skip-ResNet-34|21.80M<br>22.72M|3.681G<br>3.694G|[ResNet-34.txt](configs/train/imagenet/ResNet-34.txt)<br>[Skip-ResNet-34.txt](configs/train/imagenet/Skip-ResNet-34.txt)|
-|ResNet-50<br>Skip-ResNet-50|25.56M<br>40.15M|4.138G<br>4.201G|[ResNet-50.txt](configs/train/imagenet/ResNet-50.txt)<br>[Skip-ResNet-50.txt](configs/train/imagenet/Skip-ResNet-50.txt)|
-|ResNet-101<br>Skip-ResNet-101|44.55M<br>83.36M|7.874G<br>8.017G|[ResNet-101.txt](configs/train/imagenet/ResNet-101.txt)<br>[Skip-ResNet-101.txt](configs/train/imagenet/Skip-ResNet-101.txt)|
-|ResNeXt-50-32x4d<br>Skip-ResNeXt-50-32x4d|25.03M<br>39.63M|4.292G<br>4.355G|[ResNeXt-50-32x4d.txt](configs/train/imagenet/ResNeXt-50-32x4d.txt)<br>[Skip-ResNeXt-50-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-50-32x4d.txt)|
-|ResNeXt-101-32x4d<br>Skip-ResNeXt-101-32x4d|44.18M<br>82.99M|8.063G<br>8.205G|[ResNeXt-101-32x4d.txt](configs/train/imagenet/ResNeXt-101-32x4d.txt)<br>[Skip-ResNeXt-101-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-101-32x4d.txt)|
+|ResNet-50<br>SE-ResNet-50<br>Skip-ResNet-50|25.56M<br>28.09M<br>40.15M|4.138G<br>4.151G<br>4.201G|[ResNet-50.txt](configs/train/imagenet/ResNet-50.txt)<br>[SE-ResNet-50.txt](configs/train/imagenet/SE-ResNet-50.txt)<br>[Skip-ResNet-50.txt](configs/train/imagenet/Skip-ResNet-50.txt)|
+|ResNet-101<br>SE-ResNet-101<br>Skip-ResNet-101|44.55M<br>49.33M<br>83.36M|7.874G<br>7.897G<br>8.017G|[ResNet-101.txt](configs/train/imagenet/ResNet-101.txt)<br>[SE-ResNet-101.txt](configs/train/imagenet/SE-ResNet-101.txt)<br>[Skip-ResNet-101.txt](configs/train/imagenet/Skip-ResNet-101.txt)|
+|ResNeXt-50-32x4d<br>SE-ResNeXt-50-32x4d<br>Skip-ResNeXt-50-32x4d|25.03M<br>27.56M<br>39.63M|4.292G<br>4.306G<br>4.355G|[ResNeXt-50-32x4d.txt](configs/train/imagenet/ResNeXt-50-32x4d.txt)<br>[SE-ResNeXt-50-32x4d.txt](configs/train/imagenet/SE-ResNeXt-50-32x4d.txt)<br>[Skip-ResNeXt-50-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-50-32x4d.txt)|
+|ResNeXt-101-32x4d<br>SE-ResNeXt-101-32x4d<br>Skip-ResNeXt-101-32x4d|44.18M<br>48.96M<br>82.99M|8.063G<br>8.085G<br>8.205G|[ResNeXt-101-32x4d.txt](configs/train/imagenet/ResNeXt-101-32x4d.txt)<br>[SE-ResNeXt-101-32x4d.txt](configs/train/imagenet/SE-ResNeXt-101-32x4d.txt)<br>[Skip-ResNeXt-101-32x4d.txt](configs/train/imagenet/Skip-ResNeXt-101-32x4d.txt)|
 |RegNetY-1.6<br>Skip-RegNetY-1.6|11.20M<br>14.76M|1.650G<br>1.677G|[RegNetY-1.6.txt](configs/train/imagenet/RegNetY-1.6.txt)<br>[Skip-RegNetY-1.6.txt](configs/train/imagenet/Skip-RegNetY-1.6.txt)|
 |RegNetY-3.2<br>Skip-RegNetY-3.2|19.44M<br>25.35M|3.229G<br>3.265G|[RegNetY-3.2.txt](configs/train/imagenet/RegNetY-3.2.txt)<br>[Skip-RegNetY-3.2.txt](configs/train/imagenet/Skip-RegNetY-3.2.txt)|
 |ConvNeXt-T<br>Skip-ConvNeXt-T|28.59M<br>31.14M|4.569G<br>4.591G|[ConvNeXt-T.txt](configs/train/imagenet/ConvNeXt-T.txt)<br>[Skip-ConvNeXt-T.txt](configs/train/imagenet/Skip-ConvNeXt-T.txt)|
 |ConvNeXt-S<br>Skip-ConvNeXt-S|50.22M<br>56.58M|8.863G<br>8.912G|[ConvNeXt-S.txt](configs/train/imagenet/ConvNeXt-S.txt)<br>[Skip-ConvNeXt-S.txt](configs/train/imagenet/Skip-ConvNeXt-S.txt)|
-
+|ConvNeXt-B<br>Skip-ConvNeXt-B|88.59M<br>99.85M|15.58G<br>15.65G|[ConvNeXt-B.txt](configs/train/imagenet/ConvNeXt-B.txt)<br>[Skip-ConvNeXt-B.txt](configs/train/imagenet/Skip-ConvNeXt-B.txt)|
+|SwinTiny-224<br>Skip-SwinTiny-224|<br>|<br>|[SwinTinyPatch4-224.txt](configs/train/imagenet/SwinTinyPatch4-224.txt)<br>[Skip-SwinTinyPatch4-224.txt](configs/train/imagenet/Skip-SwinTinyPatch4-224.txt)|
+|SwinSmall-224<br>Skip-SwinSmall-224|<br>|<br>|[SwinSmallPatch4-224.txt](configs/train/imagenet/SwinSmallPatch4-224.txt)<br>[Skip-SwinSmallPatch4-224.txt](configs/train/imagenet/Skip-SwinSmallPatch4-224.txt)|
 
 ### Results on the ImageNet-1k dataset
 |Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|
 |:---|:---:|:---:|:---:|:---:|
 |ResNet-34<sub>(3)</sub><br>Skip-ResNet-34<sub>(3)</sub>|0.7553<br>0.7675|0.7622<br>0.7759|0.7654<br>0.7778|0.7665<br>**0.7782**|
-|ResNet-50<sub>(5)</sub><br>Skip-ResNet-50<sub>(5)</sub>|0.7901<br>0.8041|0.7953<br>0.8103|0.7964<br>**0.8120**|0.7954<br>0.8104|
-|ResNet-101<sub>(3)</sub><br>Skip-ResNet-101<sub>(3)</sub>|0.8036<br>0.8139|0.8100<br>0.8217|0.8095<br>**0.8234**|0.8086<br>0.8208|
-|ResNeXt-50-32x4d<sub>(3)</sub><br>Skip-ResNeXt-50-32x4d<sub>(3)</sub>|0.7973<br>0.8067|0.8015<br>0.8125|0.8030<br>**0.8131**|0.8011<br>0.8126|
-|ResNeXt-101-32x4d<sub>(3)</sub><br>Skip-ResNeXt-101-32x4d<sub>(3)</sub>|0.8066<br>0.8139|0.8102<br>0.8203|0.8112<br>**0.8216**|0.8101<br>0.8210|
+|ResNet-50<sub>(5)</sub><br>SE-ResNet-50<sub>(3)</sub><br>Skip-ResNet-50<sub>(5)</sub>|0.7901<br>0.7991<br>0.8041|0.7953<br>0.8055<br>0.8103|0.7964<br>0.8081<br>**0.8120**|0.7954<br>0.8072<br>0.8104|
+|ResNet-101<sub>(3)</sub><br>SE-ResNet-101<sub>(3)</sub><br>Skip-ResNet-101<sub>(3)</sub>|0.8036<br>0.8102<br>0.8139|0.8100<br>0.8157<br>0.8217|0.8095<br>0.8184<br>**0.8234**|0.8086<br>0.8177<br>0.8208|
+|ResNeXt-50-32x4d<sub>(3)</sub><br>SE-ResNeXt-50-32x4d<sub>(3)</sub><br>Skip-ResNeXt-50-32x4d<sub>(3)</sub>|0.7973<br>0.8041<br>0.8067|0.8015<br>0.8093<br>0.8125|0.8030<br>0.8117<br>**0.8131**|0.8011<br>0.8110<br>0.8126|
+|ResNeXt-101-32x4d<sub>(3)</sub><br>SE-ResNeXt-101-32x4d<sub>(3)</sub><br>Skip-ResNeXt-101-32x4d<sub>(3)</sub>|0.8066<br>0.8085<br>0.8139|0.8102<br>0.8137<br>0.8203|0.8112<br>0.8165<br>**0.8216**|0.8101<br>0.8188<br>0.8210|
 |RegNetY-1.6<sub>(3)</sub><br>Skip-RegNetY-1.6<sub>(3)</sub>|0.7736<br>0.7794|0.7841<br>0.7887|0.7879<br>0.7936|0.7904<br>**0.7946**|
 |RegNetY-3.2<sub>(3)</sub><br>Skip-RegNetY-3.2<sub>(3)</sub>|0.7849<br>0.7884|0.7933<br>0.7960|0.7974<br>0.7997|0.7981<br>**0.8000**|
 |ConvNeXt-T<sub>(3)</sub><br>Skip-ConvNeXt-T<sub>(3)</sub>|0.8157<br>0.8158|0.8171<br>0.8205|0.8157<br>**0.8224**|0.8094<br>**0.8224**|
 |ConvNeXt-S<sub>(3)</sub><br>Skip-ConvNeXt-S<sub>(3)</sub>|0.8314<br>0.8333|0.8344<br>0.8367|0.8341<br>0.8374|0.8307<br>**0.8375**|
+|ConvNeXt-B<sub>(3)</sub><br>Skip-ConvNeXt-B<sub>(3)</sub>|0.8355<br>0.8337|0.8376<br>0.8391|0.8372<br>0.8399|0.8350<br>**0.8400**|
+|SwinTiny-224<sub>(3)</sub><br>Skip-SwinTiny-224<sub>(3)</sub>|0.8124<br>0.8150|-<br>-|-<br>-|-<br>-|
+|SwinSmall-224<sub>(3)</sub><br>Skip-SwinSmall-224<sub>(3)</sub>|0.8288<br>0.8273|-<br>-|-<br>-|-<br>-|
 
 ### Results on the ImageNet-A dataset
 |Model|top-1 acc.<br>(224x224)|top-1 acc.<br>(256x256)|top-1 acc.<br>(288x288)|top-1 acc.<br>(320x320)|
 |:---|:---:|:---:|:---:|:---:|
 |ResNet-34<sub>(3)</sub><br>Skip-ResNet-34<sub>(3)</sub>|0.0143<br>0.0259|0.0204<br>0.0328|0.0297<br>0.0416|0.0321<br>**0.0448**|
-|ResNet-50<sub>(5)</sub><br>Skip-ResNet-50<sub>(5)</sub>|0.0304<br>0.0695|0.0477<br>0.0889|0.0583<br>0.0987|0.0625<br>**0.1015**|
-|ResNet-101<sub>(3)</sub><br>Skip-ResNet-101<sub>(3)</sub>|0.0635<br>0.1157|0.0869<br>0.1324|0.1015<br>**0.1481**|0.1023<br>0.1455|
-|ResNeXt-50-32x4d<sub>(3)</sub><br>Skip-ResNeXt-50-32x4d<sub>(3)</sub>|0.0537<br>0.0916|0.0743<br>0.1072|0.0844<br>**0.1179**|0.0843<br>0.1179|
-|ResNeXt-101-32x4d<sub>(3)</sub><br>Skip-ResNeXt-101-32x4d<sub>(3)</sub>|0.0889<br>0.1319|0.1155<br>0.1528|0.1261<br>**0.1628**|0.1288<br>0.1557|
+|ResNet-50<sub>(5)</sub><br>SE-ResNet-50<sub>(3)</sub><br>Skip-ResNet-50<sub>(5)</sub>|0.0304<br>0.0560<br>0.0695|0.0477<br>0.0763<br>0.0889|0.0583<br>0.0855<br>0.0987|0.0625<br>0.0868<br>**0.1015**|
+|ResNet-101<sub>(3)</sub><br>SE-ResNet-101<sub>(3)</sub><br>Skip-ResNet-101<sub>(3)</sub>|0.0635<br>0.0841<br>0.1157|0.0869<br>0.1083<br>0.1324|0.1015<br>0.1203<br>**0.1481**|0.1023<br>0.1253<br>0.1455|
+|ResNeXt-50-32x4d<sub>(3)</sub><br>SE-ResNeXt-50-32x4d<sub>(3)</sub><br>Skip-ResNeXt-50-32x4d<sub>(3)</sub>|0.0537<br>0.0749<br>0.0916|0.0743<br>0.0929<br>0.1072|0.0844<br>0.1028<br>**0.1179**|0.0843<br>0.1063<br>0.1179|
+|ResNeXt-101-32x4d<sub>(3)</sub><br>SE-ResNeXt-101-32x4d<sub>(3)</sub><br>Skip-ResNeXt-101-32x4d<sub>(3)</sub>|0.0889<br>0.1033<br>0.1319|0.1155<br>0.1235<br>0.1528|0.1261<br>0.1325<br>**0.1628**|0.1288<br>0.1340<br>0.1557|
 |RegNetY-1.6<sub>(3)</sub><br>Skip-RegNetY-1.6<sub>(3)</sub>|0.0376<br>0.0520|0.0493<br>0.0649|0.0580<br>0.0748|0.0621<br>**0.0779**|
 |RegNetY-3.2<sub>(3)</sub><br>Skip-RegNetY-3.2<sub>(3)</sub>|0.0504<br>0.0599|0.0616<br>0.0720|0.0709<br>0.0775|0.0752<br>**0.0821**|
 |ConvNeXt-T<sub>(3)</sub><br>Skip-ConvNeXt-T<sub>(3)</sub>|0.1032<br>0.1231|0.1277<br>0.1432|0.1383<br>**0.1519**|0.1300<br>0.1497|
 |ConvNeXt-S<sub>(3)</sub><br>Skip-ConvNeXt-S<sub>(3)</sub>|0.1455<br>0.1625|0.1723<br>0.1839|0.1839<br>0.1965|0.1780<br>**0.1973**|
+|ConvNeXt-B<sub>(3)</sub><br>Skip-ConvNeXt-B<sub>(3)</sub>|0.1653<br>0.1815|0.1973<br>0.2056|0.2016<br>**0.2157**|0.1949<br>0.2143|
+|SwinTiny-224<sub>(3)</sub><br>Skip-SwinTiny-224<sub>(3)</sub>|0.0988<br>0.1145|-<br>-|-<br>-|-<br>-|
+|SwinSmall-224<sub>(3)</sub><br>Skip-SwinSmall-224<sub>(3)</sub>|0.1503<br>0.1531|-<br>-|-<br>-|-<br>-|
 
 ## Performances of models trained on CIFAR-10/100
 Following models are trainied using the CIFAR-10/100 dataset from scratch. No extra images are used.
